@@ -38,8 +38,9 @@ class Repo:
 
 repo = Repo("https://github.com/chirmstream/VerifiedCommits.git")
 #repo.clone()
-repo.add()
-repo.commit("test commit message")
+#repo.add()
+#repo.commit("test commit message")
+# Need to edit .git/config url to be https://username:personal_access_token@github.com/chirmstream/VerifiedCommits.git
 repo.push("origin", "main")
 
 
