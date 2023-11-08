@@ -33,7 +33,21 @@ class Repo:
         # Runs the 'git push' command
         subprocess.run(["git", "push", remote_name, branch_name], cwd=self.local_dir)
 
-
+    def configure(self):
+        # Load current .git/config
+        cwd = os.getcwd()
+        #location = self.local_dir + "/.git/config"
+        #location = repos\\chirmstream\\Verified\\Commits\\.git\\config
+        os.chdir("repos")
+        os.chdir(self.username)
+        os.chdir(self.name)
+        os.chdir(".git")
+        cwd = os.getcwd()
+        with open("location", "r") as file:
+            config = file.read()
+            for line in config:
+                if line == "url":
+                    url = "https://..."
 
 
 repo = Repo("https://github.com/chirmstream/VerifiedCommits.git")
@@ -41,9 +55,13 @@ repo = Repo("https://github.com/chirmstream/VerifiedCommits.git")
 #repo.add()
 #repo.commit("test commit message")
 # Need to edit .git/config url to be https://username:personal_access_token@github.com/chirmstream/VerifiedCommits.git
+repo.configure()
 repo.push("origin", "main")
 
 
+
+
+# Regular expression examples
 def validate(ip):
     numerical = re.search(r"^[\d]{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip)
     if numerical:
