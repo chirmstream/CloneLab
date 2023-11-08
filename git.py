@@ -36,18 +36,32 @@ class Repo:
     def configure(self):
         # Load current .git/config
         cwd = os.getcwd()
-        #location = self.local_dir + "/.git/config"
-        #location = repos\\chirmstream\\Verified\\Commits\\.git\\config
         os.chdir("repos")
         os.chdir(self.username)
         os.chdir(self.name)
         os.chdir(".git")
         cwd = os.getcwd()
-        with open("location", "r") as file:
+        new_config = []
+        with open("config", "r+") as file:
             config = file.read()
-            for line in config:
-                if line == "url":
-                    url = "https://..."
+            line = []
+            for char in config:
+                line.append(char)
+                if char == "\n":
+                    line = "".join(map(str,line))
+                    new_config.append(line)
+                    line = []
+            
+            for line in new_config:
+                tmp = line[:5]
+                print(tmp)
+                if line[:4] == "\turl" or line[:3] == "url":
+                    url = f"https://{self.username}:<personal_access_token>@github.com/{self.username}/{self.name}.git"
+                    print(url)
+
+
+
+            #print(new_config)
 
 
 repo = Repo("https://github.com/chirmstream/VerifiedCommits.git")
