@@ -7,6 +7,7 @@ class Repo:
     # url should include ".git" at the end
     def __init__(self, url):
         self.url = url
+        self.cloned = False
 
         match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
         if match:
@@ -19,6 +20,7 @@ class Repo:
     def clone(self):
         # Runs the 'git clone' command
         subprocess.run(['git', 'clone', self.url, self.local_dir])
+        self.cloned = True
 
 
 repo = Repo("https://github.com/chirmstream/VerifiedCommits.git")
