@@ -52,12 +52,16 @@ class Repo:
                     new_config.append(line)
                     line = []
             
+            counter = -1
             for line in new_config:
-                tmp = line[:5]
-                print(tmp)
+                counter = counter + 1
                 if line[:4] == "\turl" or line[:3] == "url":
                     url = f"https://{self.username}:<personal_access_token>@github.com/{self.username}/{self.name}.git"
                     print(url)
+                    new_config[counter] = url
+                    break
+
+            print(new_config)
 
 
 
