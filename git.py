@@ -8,7 +8,6 @@ class Repo:
     def __init__(self, url):
         self.url = url
         self.cloned = False
-
         match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
         if match:
             self.username = match.group(1)
@@ -22,10 +21,26 @@ class Repo:
         subprocess.run(['git', 'clone', self.url, self.local_dir])
         self.cloned = True
 
+    def add(self):
+        # Runs the 'git commit -a' command to stage all changes
+        subprocess.run(["git", "add", "."], cwd=self.local_dir)
+
+    def commit(self, message):
+        # Runs the 'git commit -S -m' command
+        subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.local_dir)
+
+    def push(self, remote_name, branch_name):
+        # Runs the 'git push' command
+        subprocess.run(["git", "push", remote_name, branch_name], cwd=self.local_dir)
+
+
+
 
 repo = Repo("https://github.com/chirmstream/VerifiedCommits.git")
-repo.clone()
-
+#repo.clone()
+repo.add()
+repo.commit("test commit message")
+repo.push("origin", "main")
 
 
 def validate(ip):
