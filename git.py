@@ -8,13 +8,13 @@ class Repo:
     def __init__(self, url):
         self.url = url
 
-    def clone(self, local_dir):
         match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
         if match:
-            username = match.group(1)
-            if username:
-                repo_name = match.group(2)
+            self.username = match.group(1)
+            if self.username:
+                self.name = match.group(2)
 
+    def clone(self, local_dir):
 
         # Runs the 'git clone' command
         subprocess.run(['git', 'clone', self.url, local_dir])
