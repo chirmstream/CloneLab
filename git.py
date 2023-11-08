@@ -14,14 +14,15 @@ class Repo:
             if self.username:
                 self.name = match.group(2)
 
-    def clone(self, local_dir):
+        self.local_dir = "repos" + "/" + self.username + "/" + self.name
 
+    def clone(self):
         # Runs the 'git clone' command
-        subprocess.run(['git', 'clone', self.url, local_dir])
+        subprocess.run(['git', 'clone', self.url, self.local_dir])
 
 
 repo = Repo("https://github.com/chirmstream/VerifiedCommits.git")
-repo.clone("repos")
+repo.clone()
 
 
 
