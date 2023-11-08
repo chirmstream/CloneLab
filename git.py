@@ -9,9 +9,11 @@ class Repo:
         self.url = url
 
     def clone(self, local_dir):
-        username = re.search(r"https://(?:www\.)?github.com/(chirmstream)/VerifiedCommits.git", self.url)
-        if username:
-            username = username.group(1)
+        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
+        if match:
+            username = match.group(1)
+            if username:
+                repo_name = match.group(2)
 
 
         # Runs the 'git clone' command
