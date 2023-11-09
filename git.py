@@ -19,6 +19,7 @@ class Repo:
     def clone(self):
         # Runs the 'git clone' command
         subprocess.run(['git', 'clone', self.url, self.local_dir])
+        self.backup_config()
         self.cloned = True
 
     def add(self):
@@ -34,7 +35,6 @@ class Repo:
         subprocess.run(["git", "push", remote_name, branch_name], cwd=self.local_dir)
 
     def configure(self, password):
-        # Load current .git/config
         cwd = os.getcwd()
         os.chdir("repos")
         os.chdir(self.username)
@@ -47,16 +47,42 @@ class Repo:
             new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.username}:{password}@github.com/{self.username}/{self.name}.git", old_config)
             file.write(new_config)
 
+    def backup_config(self):
+        os.chdir("repos")
+        os.chdir(self.username)
+        os.chdir(self.name)
+        os.chdir(".git")
+        with open("config", "r") as file:
+            config = file.read()
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
+        cwd = os.getcwd()
+        if not os.path.isdir("repo_configs"):
+            os.makedirs("repo_configs")
+        os.chdir("repo_configs")
+        if not os.path.isdir(f"{self.username}"):
+            os.makedirs(f"{self.username}")
+        os.chdir(f"{self.username}")
+        if not os.path.isdir(f"{self.name}"):
+            os.makedirs(f"{self.name}")
+        os.chdir(f"{self.name}")
+        cwd = os.getcwd()
+        with open("config", "w") as file:
+            file.write(config)
 
 token_password = "token"
 repo = Repo("https://github.com/chirmstream/CloneLab-Testing.git")
 
-#repo.clone()
+repo.clone()
 #repo.configure(token_password)
 
-repo.add()
-repo.commit("test commit message")
-repo.push("origin", "main")
+#repo.add()
+#repo.commit("test commit message")
+#repo.push("origin", "main")
+
+#repo.backup_config()
 
 
 
