@@ -10,9 +10,3 @@ repo = git.Repo(original_url, mirror_url)
 repo.clone()
 
 repo.mirror_auth(github_personal_access_token)
-
-repo.sync()
-#repo.add()
-#repo.commit("commiting a public repo")
-
-#repo.push("origin", "main")
