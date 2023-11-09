@@ -42,7 +42,7 @@ class Repo:
                 self.mirror_name = match.group(2)
         # Set mirror repo local path
         if not os.path.isdir("mirror_repos"):
-            os.makedirs("mirror_repos")
+            os.makedirs("mirror_repos", exist_ok=True)
         os.chdir("mirror_repos")
         if not os.path.isdir(f"{self.mirror_username}"):
             os.makedirs(f"{self.mirror_username}")
@@ -69,13 +69,13 @@ class Repo:
 
     def add(self):
         # Runs the 'git commit -a' command to stage all changes on mirror repo
-        os.chdir("mirror_repos")
-        os.chdir(self.mirror_username)
-        os.chdir(self.mirror_name)
-        subprocess.run(["git", "add", "."], cwd=os.getcwd())
-        os.chdir("..")
-        os.chdir("..")
-        os.chdir("..")
+        #os.chdir("mirror_repos")
+        #os.chdir(self.mirror_username)
+        #os.chdir(self.mirror_name)
+        subprocess.run(["git", "add", "."], cwd=self.mirror_dir())
+        #os.chdir("..")
+        #os.chdir("..")
+        #os.chdir("..")
 
     def commit(self, message):
         # Runs the 'git commit -S -m' command to make a signed commit with message
@@ -85,7 +85,7 @@ class Repo:
     def push(self, remote_name, branch_name):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
         # Set cwd back to self.local_dir after fixing __init__
-        subprocess.run(["git", "push", remote_name, branch_name], cwd=os.getcwd())
+        subprocess.run(["git", "push", remote_name, branch_name], cwd=self.mirror_dir)
 
     def mirror_auth(self, password):
         # Rewrites mirror_repo .git/config url to to include username & password for https pushes.
