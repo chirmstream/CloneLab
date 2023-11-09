@@ -1,6 +1,8 @@
 import subprocess
 import os
 import re
+import sys
+import shutil
 
 
 class Repo:
@@ -54,16 +56,17 @@ class Repo:
         os.chdir("..")
 
     def clone(self):
-        # Runs the 'git clone' command and stores repo in repo.local_dir
+        # Runs the 'git clone' command for both original and mirror repo
         subprocess.run(['git', 'clone', self.url, self.dir])
+        subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
 
     def add(self):
-        # Runs the 'git commit -a' command to stage all changes
-        cwd = os.getcwd()
-        os.chdir("repos")
-        os.chdir(self.username)
-        os.chdir(self.name)
-        cwd = os.getcwd()
+        # Rsyncs original repo to mirror repo (excluding .git/) and then
+        # Runs the 'git commit -a' command to stage all changes on mirror repo
+
+        # rsync -rvh --progress --exclude '.git/' f"self.dir" f"self.mirror_dir"
+        subprocess.run(["rsync", "-rvh", self.dir, self.mirror_dir])
+
         subprocess.run(["git", "add", "."], cwd=os.getcwd())
 
     def commit(self, message):
@@ -76,22 +79,17 @@ class Repo:
         # Set cwd back to self.local_dir after fixing __init__
         subprocess.run(["git", "push", remote_name, branch_name], cwd=os.getcwd())
 
-    def configure_mirror(self, url, password):
-        # Rewrites .git/config url to mirror url.  Sets url with username and password for https pushes.
-        self.mirror_url = url
-        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.mirror_url)
-        if match:
-            self.mirror_username = match.group(1)
-            if self.mirror_username:
-                self.mirror_name = match.group(2)
-        cwd = os.getcwd()
-        os.chdir("repos")
-        os.chdir(self.username)
-        os.chdir(self.name)
+    def mirror_auth(self, password):
+        # Rewrites mirror_repo .git/config url to to include username & password for https pushes.
+        os.chdir("mirror_repos")
+        os.chdir(self.mirror_username)
+        os.chdir(self.mirror_name)
         os.chdir(".git")
-        cwd = os.getcwd()
-        with open("config", "r") as file:
-            old_config = file.read()
+        try:
+            with open("config", "r") as file:
+                old_config = file.read()
+        except FileNotFoundError:
+            sys.exit("error, mirror_repo not found")
         with open("config", "w") as file:
             new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.mirror_username}:{password}@github.com/{self.mirror_username}/{self.mirror_name}.git", old_config)
             file.write(new_config)
