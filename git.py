@@ -4,10 +4,11 @@ import re
 
 
 class Repo:
-    def __init__(self, url):
+    def __init__(self, url, mirror_url):
         # Assign repo.url, repo.username (project owner), repo.name (project name), and repo.local_dir (where repo is stored locally)
         # Url should include ".git" at the end
         self.url = url
+
         match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
         if match:
             self.username = match.group(1)
@@ -95,21 +96,6 @@ class Repo:
         os.chdir("..")
         os.chdir("..")
 
-
-
-
-
-#token_password = "token"
-#repo = Repo("https://github.com/chirmstream/CloneLab-Testing.git")
-
-#repo.clone()
-#repo.configure_mirror(git.nasdex.net, token_password)
-
-#repo.add()
-#repo.commit("test commit message")
-#repo.push("origin", "main")
-
-#repo.backup_config()
 
 
 
