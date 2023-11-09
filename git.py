@@ -69,12 +69,18 @@ class Repo:
 
     def add(self):
         # Runs the 'git commit -a' command to stage all changes on mirror repo
+        os.chdir("mirror_repos")
+        os.chdir(self.mirror_username)
+        os.chdir(self.mirror_name)
         subprocess.run(["git", "add", "."], cwd=os.getcwd())
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
 
     def commit(self, message):
         # Runs the 'git commit -S -m' command to make a signed commit with message
         # Set cwd back to self.local_dir after fixing __init__
-        subprocess.run(["git", "commit", "-S", "-m", message], cwd=os.getcwd())
+        subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir)
 
     def push(self, remote_name, branch_name):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
@@ -183,6 +189,13 @@ class Repo:
     def mirror_dir(self, mirror_dir):
         self._mirror_dir = mirror_dir
 
+
+#original_url = "https://github.com/dhouck/anti-creeper-grief.git"
+#mirror_url = "https://github.com/chirmstream/CloneLab-Testing.git"
+
+#repo = Repo(original_url, mirror_url)
+
+#repo.sync()
 
 
 
