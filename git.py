@@ -61,17 +61,14 @@ class Repo:
         subprocess.run(['git', 'clone', self.url, self.dir])
         subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
 
-    def add(self):
+    def sync(self):
         # Rsyncs original repo to mirror repo (excluding .git/) and then
+        src = self.dir + "/"
+        dest = self.mirror_dir + "/"
+        subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
+
+    def add(self):
         # Runs the 'git commit -a' command to stage all changes on mirror repo
-
-        #subprocess.run(['rsync', '-a', self.dir, self.mirror_dir])
-
-
-
-        # rsync -rvh --progress --exclude '.git/' f"self.dir" f"self.mirror_dir"
-        subprocess.run(["rsync", "-rvh", self.dir, self.mirror_dir])
-
         subprocess.run(["git", "add", "."], cwd=os.getcwd())
 
     def commit(self, message):
