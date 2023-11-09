@@ -5,6 +5,7 @@ import sys
 import shutil
 
 
+
 class Repo:
     def __init__(self, url, mirror_url):
         # Assign repo.url, repo.username (project owner), repo.name (project name), and repo.local_dir (where repo is stored locally)
@@ -63,6 +64,10 @@ class Repo:
     def add(self):
         # Rsyncs original repo to mirror repo (excluding .git/) and then
         # Runs the 'git commit -a' command to stage all changes on mirror repo
+
+        #subprocess.run(['rsync', '-a', self.dir, self.mirror_dir])
+
+
 
         # rsync -rvh --progress --exclude '.git/' f"self.dir" f"self.mirror_dir"
         subprocess.run(["rsync", "-rvh", self.dir, self.mirror_dir])
