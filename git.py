@@ -10,11 +10,96 @@ class Repo:
         self.url = url
         self.mirror_url = mirror_url
         self.set_dirs()
-        #match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
-        #if match:
-            #self.username = match.group(1)
-            #if self.username:
-                #self.name = match.group(2)
+
+    def set_dirs(self):
+        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
+        if match:
+            self.username = match.group(1)
+            if self.username:
+                self.name = match.group(2)
+        # Set repo local path
+        if not os.path.isdir("repos"):
+            os.makedirs("repos")
+        os.chdir("repos")
+        if not os.path.isdir(f"{self.username}"):
+            os.makedirs(f"{self.username}")
+        os.chdir(f"{self.username}")
+        if not os.path.isdir(f"{self.name}"):
+            os.makedirs(f"{self.name}")
+        os.chdir(f"{self.name}")
+        self.dir = os.getcwd()
+        # Reset current working directory
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
+        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.mirror_url)
+        if match:
+            self.mirror_username = match.group(1)
+            if self.mirror_username:
+                self.mirror_name = match.group(2)
+        # Set mirror repo local path
+        if not os.path.isdir("mirror_repos"):
+            os.makedirs("mirror_repos")
+        os.chdir("mirror_repos")
+        if not os.path.isdir(f"{self.mirror_username}"):
+            os.makedirs(f"{self.mirror_username}")
+        os.chdir(f"{self.mirror_username}")
+        if not os.path.isdir(f"{self.mirror_name}"):
+            os.makedirs(f"{self.mirror_name}")
+        os.chdir(f"{self.mirror_name}")
+        self.mirror_dir = os.getcwd()
+        # Reset current working directory
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
+
+    def clone(self):
+        # Runs the 'git clone' command and stores repo in repo.local_dir
+        subprocess.run(['git', 'clone', self.url, self.dir])
+
+    def add(self):
+        # Runs the 'git commit -a' command to stage all changes
+        cwd = os.getcwd()
+        os.chdir("repos")
+        os.chdir(self.username)
+        os.chdir(self.name)
+        cwd = os.getcwd()
+        subprocess.run(["git", "add", "."], cwd=os.getcwd())
+
+    def commit(self, message):
+        # Runs the 'git commit -S -m' command to make a signed commit with message
+        # Set cwd back to self.local_dir after fixing __init__
+        subprocess.run(["git", "commit", "-S", "-m", message], cwd=os.getcwd())
+
+    def push(self, remote_name, branch_name):
+        # Runs the 'git push' command (will push to wherever .git/config file url specifies)
+        # Set cwd back to self.local_dir after fixing __init__
+        subprocess.run(["git", "push", remote_name, branch_name], cwd=os.getcwd())
+
+    def configure_mirror(self, url, password):
+        # Rewrites .git/config url to mirror url.  Sets url with username and password for https pushes.
+        self.mirror_url = url
+        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.mirror_url)
+        if match:
+            self.mirror_username = match.group(1)
+            if self.mirror_username:
+                self.mirror_name = match.group(2)
+        cwd = os.getcwd()
+        os.chdir("repos")
+        os.chdir(self.username)
+        os.chdir(self.name)
+        os.chdir(".git")
+        cwd = os.getcwd()
+        with open("config", "r") as file:
+            old_config = file.read()
+        with open("config", "w") as file:
+            new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.mirror_username}:{password}@github.com/{self.mirror_username}/{self.mirror_name}.git", old_config)
+            file.write(new_config)
+        # Reset current working directory
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
 
     # Getter for url
     @property
@@ -97,99 +182,6 @@ class Repo:
     @mirror_dir.setter
     def mirror_dir(self, mirror_dir):
         self._mirror_dir = mirror_dir
-
-    def set_dirs(self):
-        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
-        if match:
-            self.username = match.group(1)
-            if self.username:
-                self.name = match.group(2)
-        # Set repo local path
-        if not os.path.isdir("repos"):
-            os.makedirs("repos")
-        os.chdir("repos")
-        if not os.path.isdir(f"{self.username}"):
-            os.makedirs(f"{self.username}")
-        os.chdir(f"{self.username}")
-        if not os.path.isdir(f"{self.name}"):
-            os.makedirs(f"{self.name}")
-        os.chdir(f"{self.name}")
-        self.dir = os.getcwd()
-        # Reset current working directory
-        os.chdir("..")
-        os.chdir("..")
-        os.chdir("..")
-        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.mirror_url)
-        if match:
-            self.mirror_username = match.group(1)
-            if self.mirror_username:
-                self.mirror_name = match.group(2)
-        # Set mirror repo local path
-        if not os.path.isdir("mirror_repos"):
-            os.makedirs("mirror_repos")
-        os.chdir("mirror_repos")
-        if not os.path.isdir(f"{self.mirror_username}"):
-            os.makedirs(f"{self.mirror_username}")
-        os.chdir(f"{self.mirror_username}")
-        if not os.path.isdir(f"{self.mirror_name}"):
-            os.makedirs(f"{self.mirror_name}")
-        os.chdir(f"{self.mirror_name}")
-        self.mirror_dir = os.getcwd()
-        # Reset current working directory
-        os.chdir("..")
-        os.chdir("..")
-        os.chdir("..")
-
-    def clone(self):
-        # Runs the 'git clone' command and stores repo in repo.local_dir
-        subprocess.run(['git', 'clone', self.url, self.local_dir])
-
-    def add(self):
-        # Runs the 'git commit -a' command to stage all changes
-        cwd = os.getcwd()
-        os.chdir("repos")
-        os.chdir(self.username)
-        os.chdir(self.name)
-        cwd = os.getcwd()
-        subprocess.run(["git", "add", "."], cwd=os.getcwd())
-
-    def commit(self, message):
-        # Runs the 'git commit -S -m' command to make a signed commit with message
-        # Set cwd back to self.local_dir after fixing __init__
-        subprocess.run(["git", "commit", "-S", "-m", message], cwd=os.getcwd())
-
-    def push(self, remote_name, branch_name):
-        # Runs the 'git push' command (will push to wherever .git/config file url specifies)
-        # Set cwd back to self.local_dir after fixing __init__
-        subprocess.run(["git", "push", remote_name, branch_name], cwd=os.getcwd())
-
-    def configure_mirror(self, url, password):
-        # Rewrites .git/config url to mirror url.  Sets url with username and password for https pushes.
-        self.mirror_url = url
-        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.mirror_url)
-        if match:
-            self.mirror_username = match.group(1)
-            if self.mirror_username:
-                self.mirror_name = match.group(2)
-        cwd = os.getcwd()
-        os.chdir("repos")
-        os.chdir(self.username)
-        os.chdir(self.name)
-        os.chdir(".git")
-        cwd = os.getcwd()
-        with open("config", "r") as file:
-            old_config = file.read()
-        with open("config", "w") as file:
-            new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.mirror_username}:{password}@github.com/{self.mirror_username}/{self.mirror_name}.git", old_config)
-            file.write(new_config)
-        # Reset current working directory
-        os.chdir("..")
-        os.chdir("..")
-        os.chdir("..")
-        os.chdir("..")
-
-
-
 
 
 
