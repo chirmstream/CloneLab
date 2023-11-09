@@ -4,37 +4,51 @@ import re
 
 
 class Repo:
-    # url should include ".git" at the end
     def __init__(self, url):
+        # Assign repo.url, repo.username (project owner), repo.name (project name), and repo.local_dir (where repo is stored locally)
+        # Url should include ".git" at the end
         self.url = url
-        self.cloned = False
         match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
         if match:
             self.username = match.group(1)
             if self.username:
                 self.name = match.group(2)
-
+        # Need to revise self.local_dir to be set using os library so that windows file paths work
         self.local_dir = "repos" + "/" + self.username + "/" + self.name
 
     def clone(self):
-        # Runs the 'git clone' command
+        # Runs the 'git clone' command and stores repo in repo.local_dir
         subprocess.run(['git', 'clone', self.url, self.local_dir])
+        # Saves a copy of the original .git/config file
         self.backup_config()
-        self.cloned = True
 
     def add(self):
         # Runs the 'git commit -a' command to stage all changes
-        subprocess.run(["git", "add", "."], cwd=self.local_dir)
+        cwd = os.getcwd()
+        os.chdir("repos")
+        os.chdir(self.username)
+        os.chdir(self.name)
+        cwd = os.getcwd()
+        subprocess.run(["git", "add", "."], cwd=os.getcwd())
 
     def commit(self, message):
-        # Runs the 'git commit -S -m' command
-        subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.local_dir)
+        # Runs the 'git commit -S -m' command to make a signed commit with message
+        # Set cwd back to self.local_dir after fixing __init__
+        subprocess.run(["git", "commit", "-S", "-m", message], cwd=os.getcwd())
 
     def push(self, remote_name, branch_name):
-        # Runs the 'git push' command
-        subprocess.run(["git", "push", remote_name, branch_name], cwd=self.local_dir)
+        # Runs the 'git push' command (will push to wherever .git/config file url specifies)
+        # Set cwd back to self.local_dir after fixing __init__
+        subprocess.run(["git", "push", remote_name, branch_name], cwd=os.getcwd())
 
-    def configure(self, password):
+    def configure_mirror(self, url, password):
+        # Rewrites .git/config url to mirror url.  Sets url with username and password for https pushes.
+        self.mirror_url = url
+        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.mirror_url)
+        if match:
+            self.mirror_username = match.group(1)
+            if self.mirror_username:
+                self.mirror_name = match.group(2)
         cwd = os.getcwd()
         os.chdir("repos")
         os.chdir(self.username)
@@ -44,8 +58,13 @@ class Repo:
         with open("config", "r") as file:
             old_config = file.read()
         with open("config", "w") as file:
-            new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.username}:{password}@github.com/{self.username}/{self.name}.git", old_config)
+            new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.mirror_username}:{password}@github.com/{self.mirror_username}/{self.mirror_name}.git", old_config)
             file.write(new_config)
+        # Reset current working directory
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
 
     def backup_config(self):
         os.chdir("repos")
@@ -71,12 +90,20 @@ class Repo:
         cwd = os.getcwd()
         with open("config", "w") as file:
             file.write(config)
+        # Set working directory to CloneLab root folder
+        os.chdir("..")
+        os.chdir("..")
+        os.chdir("..")
 
-token_password = "token"
-repo = Repo("https://github.com/chirmstream/CloneLab-Testing.git")
 
-repo.clone()
-#repo.configure(token_password)
+
+
+
+#token_password = "token"
+#repo = Repo("https://github.com/chirmstream/CloneLab-Testing.git")
+
+#repo.clone()
+#repo.configure_mirror(git.nasdex.net, token_password)
 
 #repo.add()
 #repo.commit("test commit message")
