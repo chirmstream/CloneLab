@@ -43,29 +43,10 @@ class Repo:
         cwd = os.getcwd()
         new_config = []
         with open("config", "r+") as file:
-            config = file.read()
-            line = []
-            for char in config:
-                line.append(char)
-                if char == "\n":
-                    line = "".join(map(str,line))
-                    new_config.append(line)
-                    line = []
-            
-            counter = -1
-            for line in new_config:
-                counter = counter + 1
-                if line[:4] == "\turl" or line[:3] == "url":
-                    url = f"https://{self.username}:<personal_access_token>@github.com/{self.username}/{self.name}.git"
-                    print(url)
-                    new_config[counter] = url
-                    break
+            old_config = file.read()
+            new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.username}:<token_pass>@github.com/{self.username}/{self.name}.git", old_config)
+            file.write(new_config)
 
-            print(new_config)
-
-
-
-            #print(new_config)
 
 
 repo = Repo("https://github.com/chirmstream/VerifiedCommits.git")
