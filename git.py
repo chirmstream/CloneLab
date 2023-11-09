@@ -33,7 +33,7 @@ class Repo:
         # Runs the 'git push' command
         subprocess.run(["git", "push", remote_name, branch_name], cwd=self.local_dir)
 
-    def configure(self):
+    def configure(self, password):
         # Load current .git/config
         cwd = os.getcwd()
         os.chdir("repos")
@@ -41,20 +41,21 @@ class Repo:
         os.chdir(self.name)
         os.chdir(".git")
         cwd = os.getcwd()
-        new_config = []
-        with open("config", "r+") as file:
+        with open("config", "r") as file:
             old_config = file.read()
-            new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.username}:<token_pass>@github.com/{self.username}/{self.name}.git", old_config)
+        with open("config", "w") as file:
+            new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.username}:{password}@github.com/{self.username}/{self.name}.git", old_config)
             file.write(new_config)
 
 
+token_password = "token"
+repo = Repo("https://github.com/chirmstream/CloneLab-Testing.git")
 
-repo = Repo("https://github.com/chirmstream/VerifiedCommits.git")
 #repo.clone()
-#repo.add()
-#repo.commit("test commit message")
-# Need to edit .git/config url to be https://username:personal_access_token@github.com/chirmstream/VerifiedCommits.git
-repo.configure()
+#repo.configure(token_password)
+
+repo.add()
+repo.commit("test commit message")
 repo.push("origin", "main")
 
 
