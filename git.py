@@ -15,13 +15,13 @@ class Repo:
         self.set_dirs()
 
     def set_dirs(self):
+        # Setup repo folder structure
         match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
         if match:
             self.username = match.group(1)
             if self.username:
                 self.name = match.group(2)
         self.reset_directory()
-
         # Set repo local path
         if not os.path.isdir("repos"):
             os.makedirs("repos")
@@ -34,7 +34,7 @@ class Repo:
         os.chdir(f"{self.name}")
         self.dir = os.getcwd()
         self.reset_directory()
-
+        # setup mirrored repo folder structure
         match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.mirror_url)
         if match:
             self.mirror_username = match.group(1)
