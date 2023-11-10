@@ -20,12 +20,7 @@ class Repo:
             self.username = match.group(1)
             if self.username:
                 self.name = match.group(2)
-        os.chdir(os.path.expanduser("~"))
-        if not os.path.isdir("CloneLab-data"):
-            os.makedirs("CloneLab-data")
-        os.chdir("CloneLab-data")
-        cwd = os.getcwd()
-
+        self.reset_directory()
 
         # Set repo local path
         if not os.path.isdir("repos"):
@@ -38,10 +33,8 @@ class Repo:
             os.makedirs(f"{self.name}")
         os.chdir(f"{self.name}")
         self.dir = os.getcwd()
-        # Reset current working directory
-        os.chdir("..")
-        os.chdir("..")
-        os.chdir("..")
+        self.reset_directory()
+
         match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.mirror_url)
         if match:
             self.mirror_username = match.group(1)
@@ -58,10 +51,7 @@ class Repo:
             os.makedirs(f"{self.mirror_name}")
         os.chdir(f"{self.mirror_name}")
         self.mirror_dir = os.getcwd()
-        # Reset current working directory
-        os.chdir("..")
-        os.chdir("..")
-        os.chdir("..")
+        self.reset_directory()
 
     def clone(self):
         # Runs the 'git clone' command for both original and mirror repo
@@ -76,22 +66,15 @@ class Repo:
 
     def add(self):
         # Runs the 'git commit -a' command to stage all changes on mirror repo
-        #os.chdir("mirror_repos")
-        #os.chdir(self.mirror_username)
-        #os.chdir(self.mirror_name)
         subprocess.run(["git", "add", "."], cwd=self.mirror_dir)
-        #os.chdir("..")
-        #os.chdir("..")
-        #os.chdir("..")
+        self.reset_directory()
 
     def commit(self, message):
         # Runs the 'git commit -S -m' command to make a signed commit with message
-        # Set cwd back to self.local_dir after fixing __init__
         subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir)
 
     def push(self, remote_name="", branch_name=""):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
-        # Set cwd back to self.local_dir after fixing __init__
         subprocess.run(["git", "push"], cwd=self.mirror_dir)
 
     def mirror_auth(self, password):
@@ -108,11 +91,13 @@ class Repo:
         with open("config", "w") as file:
             new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.mirror_username}:{password}@github.com/{self.mirror_username}/{self.mirror_name}.git", old_config)
             file.write(new_config)
-        # Reset current working directory
-        os.chdir("..")
-        os.chdir("..")
-        os.chdir("..")
-        os.chdir("..")
+        self.reset_directory()
+
+    def reset_directory(self):
+        os.chdir(os.path.expanduser("~"))
+        if not os.path.isdir("CloneLab-data"):
+            os.makedirs("CloneLab-data")
+        os.chdir("CloneLab-data")
 
     # Getter for url
     @property
