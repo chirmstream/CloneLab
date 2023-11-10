@@ -20,6 +20,13 @@ class Repo:
             self.username = match.group(1)
             if self.username:
                 self.name = match.group(2)
+        os.chdir(os.path.expanduser("~"))
+        if not os.path.isdir("CloneLab-data"):
+            os.makedirs("CloneLab-data")
+        os.chdir("CloneLab-data")
+        cwd = os.getcwd()
+
+
         # Set repo local path
         if not os.path.isdir("repos"):
             os.makedirs("repos")
@@ -72,7 +79,7 @@ class Repo:
         #os.chdir("mirror_repos")
         #os.chdir(self.mirror_username)
         #os.chdir(self.mirror_name)
-        subprocess.run(["git", "add", "."], cwd=self.mirror_dir())
+        subprocess.run(["git", "add", "."], cwd=self.mirror_dir)
         #os.chdir("..")
         #os.chdir("..")
         #os.chdir("..")
@@ -82,10 +89,10 @@ class Repo:
         # Set cwd back to self.local_dir after fixing __init__
         subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir)
 
-    def push(self, remote_name, branch_name):
+    def push(self, remote_name="", branch_name=""):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
         # Set cwd back to self.local_dir after fixing __init__
-        subprocess.run(["git", "push", remote_name, branch_name], cwd=self.mirror_dir)
+        subprocess.run(["git", "push"], cwd=self.mirror_dir)
 
     def mirror_auth(self, password):
         # Rewrites mirror_repo .git/config url to to include username & password for https pushes.
