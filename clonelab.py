@@ -1,12 +1,12 @@
 import git
 
 
-original_url = "https://github.com/chirmstream/repo.git"
+original_url = "https://github.com/chirmstream/CloneLab.git"
 mirror_url = "https://github.com/chirmstream/CloneLab-Testing.git"
-github_personal_access_token = "token"
+github_personal_access_token = "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"
 
 repo = git.Repo(original_url, mirror_url)
-repo.clone()
+repo.get()
 repo.mirror_auth(github_personal_access_token)
 repo.sync()
 repo.add()

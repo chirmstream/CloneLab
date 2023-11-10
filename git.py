@@ -53,10 +53,20 @@ class Repo:
         self.mirror_dir = os.getcwd()
         self.reset_directory()
 
-    def clone(self):
-        # Runs the 'git clone' command for both original and mirror repo
-        subprocess.run(['git', 'clone', self.url, self.dir])
-        subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
+    def get(self):
+        # Runs the 'git clone' command for original repo
+        if len(os.listdir(self.dir)) == 0:
+            subprocess.run(['git', 'clone', self.url, self.dir])
+        else:
+            os.chdir(self.dir)
+            subprocess.run(['git', 'pull'])
+        # Runs the 'git clone' command for mirror repo
+        if len(os.listdir(self.mirror_dir)) == 0:   
+            subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
+        else:
+            os.chdir(self.mirror_dir)
+            subprocess.run(['git', 'pull'])
+        self.reset_directory()
 
     def sync(self):
         # Rsyncs original repo to mirror repo (excluding .git/) and then
