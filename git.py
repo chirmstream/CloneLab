@@ -4,7 +4,6 @@ import re
 import sys
 
 
-
 class Repo:
     def __init__(self, url, mirror_url):
         # Assign repo.url, repo.username (project owner), repo.name (project name), and repo.local_dir (where repo is stored locally)
@@ -14,12 +13,10 @@ class Repo:
         self.set_dirs()
 
     def set_dirs(self):
+        # Setup repo domains, usernames, and project names
+        self.domain, self.username, self.name = self.parse_url(self.url)
+        self.mirror_domain, self.mirror_username, self.mirror_name = self.parse_url(self.mirror_url)
         # Setup repo folder structure
-        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.url)
-        if match:
-            self.username = match.group(1)
-            if self.username:
-                self.name = match.group(2)
         self.reset_directory()
         # Set repo local path
         if not os.path.isdir("repos"):
@@ -34,12 +31,6 @@ class Repo:
         self.dir = os.getcwd()
         self.reset_directory()
         # setup mirrored repo folder structure
-        match = re.search(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", self.mirror_url)
-        if match:
-            self.mirror_username = match.group(1)
-            if self.mirror_username:
-                self.mirror_name = match.group(2)
-        # Set mirror repo local path
         if not os.path.isdir("mirror_repos"):
             os.makedirs("mirror_repos", exist_ok=True)
         os.chdir("mirror_repos")
@@ -86,7 +77,7 @@ class Repo:
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
         subprocess.run(["git", "push"], cwd=self.mirror_dir)
 
-    def mirror_auth(self, password):
+    def set_mirror_login(self, password):
         # Rewrites mirror_repo .git/config url to to include username & password for https pushes.
         os.chdir("mirror_repos")
         os.chdir(self.mirror_username)
@@ -98,9 +89,22 @@ class Repo:
         except FileNotFoundError:
             sys.exit("error, mirror_repo not found")
         with open("config", "w") as file:
-            new_config = re.sub(r"https://(?:www\.)?github.com/(.+)/(.+)\.git", f"https://{self.mirror_username}:{password}@github.com/{self.mirror_username}/{self.mirror_name}.git", old_config)
+            new_config = re.sub(r"https://(?:www\.)?(.+)/(.+)/(.+)\.git", f"https://{self.mirror_username}:{password}@{self.mirror_domain}/{self.mirror_username}/{self.mirror_name}.git", old_config)
             file.write(new_config)
         self.reset_directory()
+
+    def parse_url(self, url):
+        try:
+            match = re.search(r"https://(?:www\.)?(.+)/(.+)/(.+)\.git", url)
+            if match:
+                domain = match.group(1)
+                if domain:
+                    username = match.group(2)
+                    if username:
+                        name = match.group(3)
+        except:
+            sys.exit(f"Error, invalid url: {url}")
+        return (domain, username, name)
 
     def reset_directory(self):
         os.chdir(os.path.expanduser("~"))
@@ -189,29 +193,3 @@ class Repo:
     @mirror_dir.setter
     def mirror_dir(self, mirror_dir):
         self._mirror_dir = mirror_dir
-
-
-
-# Regular expression examples
-def validate(ip):
-    numerical = re.search(r"^[\d]{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip)
-    if numerical:
-        ip = ip.split(".")
-        for num in ip:
-            if int(num) > 255:
-                return False
-        return True
-    return False
-
-
-def parse(s):
-    embeded_video = re.search(
-        r"\"(https?://(?:www\.)?youtube.com/embed/[a-zA-Z].+)\"", s
-    )
-    if embeded_video:
-        embeded_video = embeded_video.group(1)
-        url = re.sub(
-            r"https?://(?:www\.)?youtube.com/embed/", "https://youtu.be/", embeded_video
-        )
-        return url
-    return None
