@@ -2,7 +2,6 @@ import subprocess
 import os
 import re
 import sys
-import shutil
 
 
 
@@ -26,12 +25,12 @@ class Repo:
         if not os.path.isdir("repos"):
             os.makedirs("repos")
         os.chdir("repos")
-        if not os.path.isdir(f"{self.username}"):
-            os.makedirs(f"{self.username}")
-        os.chdir(f"{self.username}")
-        if not os.path.isdir(f"{self.name}"):
-            os.makedirs(f"{self.name}")
-        os.chdir(f"{self.name}")
+        if not os.path.isdir(self.username):
+            os.makedirs(self.username)
+        os.chdir(self.username)
+        if not os.path.isdir(self.name):
+            os.makedirs(self.name)
+        os.chdir(self.name)
         self.dir = os.getcwd()
         self.reset_directory()
         # setup mirrored repo folder structure
@@ -44,12 +43,12 @@ class Repo:
         if not os.path.isdir("mirror_repos"):
             os.makedirs("mirror_repos", exist_ok=True)
         os.chdir("mirror_repos")
-        if not os.path.isdir(f"{self.mirror_username}"):
-            os.makedirs(f"{self.mirror_username}")
+        if not os.path.isdir(self.mirror_username):
+            os.makedirs(self.mirror_username)
         os.chdir(f"{self.mirror_username}")
-        if not os.path.isdir(f"{self.mirror_name}"):
-            os.makedirs(f"{self.mirror_name}")
-        os.chdir(f"{self.mirror_name}")
+        if not os.path.isdir(self.mirror_name):
+            os.makedirs(self.mirror_name)
+        os.chdir(self.mirror_name)
         self.mirror_dir = os.getcwd()
         self.reset_directory()
 
@@ -190,14 +189,6 @@ class Repo:
     @mirror_dir.setter
     def mirror_dir(self, mirror_dir):
         self._mirror_dir = mirror_dir
-
-
-#original_url = "https://github.com/dhouck/anti-creeper-grief.git"
-#mirror_url = "https://github.com/chirmstream/CloneLab-Testing.git"
-
-#repo = Repo(original_url, mirror_url)
-
-#repo.sync()
 
 
 
