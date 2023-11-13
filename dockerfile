@@ -24,5 +24,4 @@ RUN cp /home/ubuntu/CloneLab/config.example /home/ubuntu/CloneLab-config/config
 
 # Run python script
 WORKDIR /home/ubuntu/
-#RUN python3 docker-run.py
-CMD ["python3", "-u", "/home/ubuntu/CloneLab/docker-run.py"]
+ENTRYPOINT ["python3", "/home/ubuntu/CloneLab/docker-run.py", "/home/ubuntu/CloneLab-config/config"]
