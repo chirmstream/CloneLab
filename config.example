@@ -1,2 +1,4 @@
 original_repository,mirror_repository,mirror_password
-"https://github.com/chirmstream/CloneLab.git","https://github.com/chirmstream/CloneLab-Testing.git","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"
+"https://github.com/bitcoin/bitcoin.git","https://github.com/chirmstream/bitcoin.git","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"
+"https://github.com/torvalds/linux.git", "https://github.com/chirmstream/linux.git","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"
+"https://github.com/gitlabhq/gitlabhq.git",https://github.com/chirmstream/gitlabhq.git","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"
