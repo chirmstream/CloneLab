@@ -3,11 +3,12 @@ import os
 import csv
 
 
-os.chdir("CloneLab-config")
+#os.chdir("CloneLab-config")
 
 with open("config", "r") as csvfile:
     reader = csv.DictReader(csvfile)
     fieldnames = reader.fieldnames
+    os.chdir("..")
     for row in reader:
         repo = git.Repo(row["original_repository"], row["mirror_repository"])
         repo.get()
