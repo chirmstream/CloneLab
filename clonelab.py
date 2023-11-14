@@ -1,18 +1,19 @@
 import git
+import os
+import csv
 
 
-original_url = "https://github.com/chirmstream/CloneLab.git"
+with open("config", "r") as csvfile:
+    reader = csv.DictReader(csvfile)
+    fieldnames = reader.fieldnames
+    os.chdir("..")
+    for row in reader:
+        repo = git.Repo(row["original_repository"], row["mirror_repository"])
+        repo.get()
+        repo.set_mirror_login(row["mirror_password"])
+        repo.sync()
+        repo.add()
+        repo.commit("CloneLab autocommit")
+        repo.push()
 
-mirror_url = "https://github.com/chirmstream/CloneLab-Testing.git"
-#mirror_url = "https://git.nasdex.net/chirmstream/clonelab-testing.git"
-
-github_personal_access_token = "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"
-gitlab_token = "glpat-ZsF8Ff4mLyWyaMs_XsjW"
-
-repo = git.Repo(original_url, mirror_url)
-repo.get()
-repo.set_mirror_login(github_personal_access_token)
-repo.sync()
-repo.add()
-repo.commit("this is a test commit")
-repo.push()
+print("script finished?")

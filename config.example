@@ -1,0 +1,4 @@
+original_repository,mirror_repository,mirror_password
+"https://github.com/bitcoin/bitcoin.git","https://github.com/chirmstream/bitcoin.git","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"
+"https://dev.gnupg.org/source/gnupg.git","https://github.com/chirmstream/gnupg.git","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"
+"https://github.com/openssl/openssl.git","https://github.com/chirmstream/openssl.git","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"
