@@ -87,9 +87,7 @@ class Repo:
         os.chdir("mirror_repos")
         os.chdir(self.mirror_username)
         os.chdir(self.mirror_name)
-
         if not os.path.isdir(".git"):
-            os.makedirs(".git")
             sys.exit("missing mirror git config file, please initialize repository with a readme")
         os.chdir(".git")
         try:
