@@ -51,8 +51,13 @@ class Repo:
             os.chdir(self.dir)
             subprocess.run(['git', 'pull'])
         # Runs the 'git clone' command for mirror repo
-        if len(os.listdir(self.mirror_dir)) == 0:   
-            subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
+        if len(os.listdir(self.mirror_dir)) == 0:
+            try: 
+                subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
+            except:
+                print("repository appears to be private, trying login")
+                url = f"https://{self.mirror_username}:{password}@{self.mirror_domain}/{self.mirror_username}/{self.mirror_name}.git"
+                subprocess.run(['git', 'clone', url, self.mirror_dir])
         else:
             os.chdir(self.mirror_dir)
             subprocess.run(['git', 'pull'])
@@ -82,6 +87,10 @@ class Repo:
         os.chdir("mirror_repos")
         os.chdir(self.mirror_username)
         os.chdir(self.mirror_name)
+
+        if not os.path.isdir(".git"):
+            os.makedirs(".git")
+            sys.exit("missing mirror git config file, please initialize repository with a readme")
         os.chdir(".git")
         try:
             with open("config", "r") as file:
