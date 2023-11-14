@@ -8,6 +8,7 @@ RUN apt-get -y update
 RUN apt-get -y install git
 RUN apt-get -y install python3
 RUN apt-get -y install rsync
+RUN apt-get -y install gpg
 
 
 # Setup CloneLab (use git clone in future)
@@ -26,10 +27,17 @@ RUN mkdir config
 # Copy example config from /root/CloneLab
 RUN cp /root/CloneLab/config.example /home/CloneLab/config/config
 
+# Copy gpg key
+RUN cp /root/CloneLab/private.gpg /home/CloneLab/config/private.gpg
+
 # Configure git
 WORKDIR /home/CloneLab/
 RUN git config --global user.name "chirmstream"
 RUN git config --global user.email "dextergbarney@gmail.com"
+
+# Import GPG key
+WORKDIR /home/CloneLab/config
+RUN gpg --import -ownertrust private.gpg
 
 # Run python script and setup user
 WORKDIR /home/CloneLab/config/
