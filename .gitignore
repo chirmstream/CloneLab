@@ -162,3 +162,5 @@ cython_debug/
 # macOS files
 .DS_STORE
 repos/
+
+private.gpg
