@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     gpg
 
 # Setup CloneLab (use git clone in future)
-COPY ./ /root/CloneLab
+WORKDIR /root
+RUN git clone https://github.com/chirmstream/CloneLab.git
 
 # Copy example config from /root/CloneLab
 WORKDIR /home/
