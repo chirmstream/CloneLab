@@ -1,24 +1,22 @@
-# Build the image based on official ubuntu lunar image
 FROM ubuntu:lunar-20231004
-
-# Update ubuntu
-RUN apt-get -y update
+LABEL "author"="chirmstream"
+LABEL version="x.x.x"
 
 # Install requirements
-RUN apt-get -y install git
-RUN apt-get -y install python3
-RUN apt-get -y install rsync
-RUN apt-get -y install gpg
+RUN apt-get update && apt-get install -y \
+    python3 \
+    git \
+    rsync \
+    gpg
 
 # Setup CloneLab (use git clone in future)
 COPY ./ /root/CloneLab
 
+# Copy example config from /root/CloneLab
 WORKDIR /home/
 RUN mkdir CloneLab
 WORKDIR /home/CloneLab/
 RUN mkdir config
-
-# Copy example config from /root/CloneLab
 RUN cp /root/CloneLab/config.csv.example /home/CloneLab/config/config
 
 # Configure git
