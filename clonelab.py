@@ -4,6 +4,16 @@ import csv
 import subprocess
 
 
+# Configure git
+with open("git_config.csv", "r") as git_config:
+    reader = csv.DictReader(git_config)
+    fieldnames = reader.fieldnames
+    for row in reader:
+        username = row["username"]
+        email = row["email"]
+        subprocess.run(['git', 'config', '--global', 'user.name', username])
+        subprocess.run(['git', 'config', '--global', 'user.email', email])
+
 # Import GPG key
 subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
 
@@ -11,7 +21,7 @@ subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
 with open("config.csv", "r") as csvfile:
     reader = csv.DictReader(csvfile)
     fieldnames = reader.fieldnames
-    os.chdir("..")
+    #os.chdir("..")
     for row in reader:
         repo = git.Repo(row["original_repository"], row["mirror_repository"])
         print(f"Starting mirroring for {repo.url}")

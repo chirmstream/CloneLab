@@ -19,11 +19,6 @@ WORKDIR /home/CloneLab/
 RUN mkdir config
 RUN cp /root/CloneLab/config.csv.example /home/CloneLab/config/config
 
-# Configure git
-WORKDIR /home/CloneLab/
-RUN git config --global user.name "chirmstream"
-RUN git config --global user.email "dextergbarney@gmail.com"
-
 # Run CloneLab
 WORKDIR /home/CloneLab/config/
 CMD ["python3", "/root/CloneLab/clonelab.py", "/home/CloneLab/config/config"]
