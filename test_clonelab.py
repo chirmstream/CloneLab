@@ -1,19 +1,27 @@
 import git
 import os
 import csv
+#import subprocess
 
 
-with open("config.example", "r") as csvfile:
+# Import GPG key
+#subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
+
+# Sync mirror repors
+with open("config.csv.example", "r") as csvfile:
     reader = csv.DictReader(csvfile)
     fieldnames = reader.fieldnames
     os.chdir("..")
     for row in reader:
         repo = git.Repo(row["original_repository"], row["mirror_repository"])
+        print(f"Starting mirroring for {repo.url}")
         repo.get()
         repo.set_mirror_login(row["mirror_password"])
         repo.sync()
         repo.add()
         repo.commit("CloneLab autocommit")
         repo.push()
+        print(f"{repo.url} successfully mirrored to {repo.mirror_url}")
 
-print("script finished?")
+print("CLoneLab finished!  All repositories have been mirrored.")
+print("Exiting")
