@@ -19,11 +19,6 @@ RUN mkdir CloneLab
 WORKDIR /home/CloneLab/
 RUN mkdir config
 
-# Setup persistant storage and docker volumes
-#WORKDIR /home/ubuntu/CloneLab-data
-#VOLUME ["/home/ubuntu/CloneLab-config", \
-#        "/home/ubuntu/CloneLab-data"]
-
 # Copy example config from /root/CloneLab
 RUN cp /root/CloneLab/config.example /home/CloneLab/config/config
 
