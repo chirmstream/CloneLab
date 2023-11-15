@@ -10,3 +10,8 @@ https://www.jwillikers.com/backup-and-restore-a-gpg-key
 gpg -o private.gpg --export-options backup --export-secret-keys ponder.stibbons@unseen.edu
 
 gpg --import-options restore --import private.gpg
+
+## Docker container mapping
+docker run \
+    -v /example-host/config:/home/CloneLab/config \
+    -v /example-host/data:/root/CloneLab-data
