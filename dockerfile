@@ -23,7 +23,7 @@ RUN mkdir config
 RUN cp /root/CloneLab/config.example /home/CloneLab/config/config
 
 # Copy gpg key
-RUN cp /root/CloneLab/private.gpg /home/CloneLab/config/private.gpg
+#RUN cp /root/CloneLab/private.gpg /home/CloneLab/config/private.gpg
 
 # Configure git
 WORKDIR /home/CloneLab/
@@ -31,8 +31,8 @@ RUN git config --global user.name "chirmstream"
 RUN git config --global user.email "dextergbarney@gmail.com"
 
 # Import GPG key
-WORKDIR /home/CloneLab/config
-RUN gpg --import -ownertrust private.gpg
+#WORKDIR /home/CloneLab/config
+#RUN gpg --import -ownertrust private.gpg
 
 # Run python script and setup user
 WORKDIR /home/CloneLab/config/
