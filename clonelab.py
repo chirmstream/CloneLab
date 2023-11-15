@@ -14,11 +14,14 @@ with open("config.csv", "r") as csvfile:
     os.chdir("..")
     for row in reader:
         repo = git.Repo(row["original_repository"], row["mirror_repository"])
+        print(f"Starting mirroring for {repo.url}")
         repo.get()
         repo.set_mirror_login(row["mirror_password"])
         repo.sync()
         repo.add()
         repo.commit("CloneLab autocommit")
         repo.push()
+        print(f"{repo.url} successfully mirrored to {repo.mirror_url}")
 
-print("script finished?")
+print("CLoneLab finished!  All repositories have been mirrored.")
+print("Exiting")
