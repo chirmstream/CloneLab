@@ -1,11 +1,7 @@
 import git
 import os
 import csv
-#import subprocess
 
-
-# Import GPG key
-#subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
 
 # Sync mirror repors
 with open("config.csv.example", "r") as csvfile:
