@@ -83,29 +83,32 @@ class Repo:
             "message":""
         }
         for _ in range(len(log)):
-            if log[_][:7] == "commit ":
-                commit = log[_][7:]
+            line = log[_]
+            if line[:7] == "commit ":
+                commit = line[7:]
                 current_commit["commit"] = commit
-            elif log[_][:8] == "Author: ":
-                author = log[_][8:]
+            elif line[:8] == "Author: ":
+                author = line[8:]
                 current_commit["author"] = author
-            elif log[_][:6] == "Date: ":
-                date = log[_][8:]
+            elif line[:6] == "Date: ":
+                date = line[8:]
                 current_commit["date"] = date
             else:
                 try:
                     if log[_ + 1][:7] != "commit ":
-                        message = current_commit["message"] + log[_][4:]
+                        message = current_commit["message"] + line[4:]
                         current_commit["message"] = message
                     else:
-                        message = current_commit["message"] + log[_]
+                        message = current_commit["message"] + line
                         current_commit["message"] = message
-                        commits.append(current_commit)
+                        next_commit = current_commit.copy()
+                        commits.append(next_commit)
                         current_commit["message"] = ""
                 except:
-                    message = current_commit["message"] + log[_]
+                    message = current_commit["message"] + line
                     current_commit["message"] = self.add_newline(message)
-                    commits.append(current_commit)
+                    next_commit = current_commit.copy()
+                    commits.append(next_commit)
         return commits
 
     def add_newline(self, s):
