@@ -64,6 +64,20 @@ class Repo:
         self.reset_directory()
 
     def sync(self):
+        # Run git log --reverse > ~/tmp/
+        cwd = os.chdir(os.path.expanduser("~"))
+        os.chdir(cwd)
+        if not os.path.isdir("tmp"):
+            os.makedirs("tmp")
+        os.chdir("tmp")
+        cwd = os.getcwd()
+        log_path = cwd + "/" + "log.txt"
+        mirror_log_path = cwd + "/" + "mirror_log.txt"
+        self.reset_directory()
+        
+        # Get commit history for repo and mirror_repo
+        subprocess(["git", "log", "--reverse", log_path])
+
         # Rsyncs original repo to mirror repo (excluding .git/) and then
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
