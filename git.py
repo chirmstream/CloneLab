@@ -113,10 +113,40 @@ class Repo:
         return s
 
     def sync(self):
+        # https://www.codecademy.com/resources/docs/git/rebase
         commits, mirror_commits = self.get_commits()
         for _ in range(len(mirror_commits)):
             current_commit = commits[_]
             current_mirror_commit = mirror_commits[_]
+            commit_hash = current_commit["commit"]
+            #... = mirror commit_info
+
+            os.chdir(f"{self.dir}")
+            subprocess.run(["git", "checkout", commit_hash])
+
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "rebase", "-i"])
+
+            self.rsync()
+
+            self.add()
+            subprocess.run(["git", "rebase", "--continue"])
+
+            os.chdir(f"{self.dir}")
+            subprocess.run(["git", "switch", "-"])
+            self.push()
+
+
+
+            #if mirror_commit_info != current_commit:
+                #git checkout current_commit["commit"]
+                #git rebase -i
+                #rsync
+                #git add all files
+                #git rebase --continue
+                #git switch -
+                #git checkout current_commit+1["commit"]
+                #...
             # Process mirror_commits, cross reference messages (which contain information regarding original commit \
             # hashes, authors, and messages.)
 
@@ -132,12 +162,18 @@ class Repo:
         subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
 
         self.add()
-        commit_msg = f"Clonelab auto repository mirroring\nOriginial commit details:\ncommit {current_commit["commit"]}\nAuthor: {current_commit["author"]}\ndate: {current_commit["date"]}\nmessage: {current_commit["message"]}"
+        #commit_msg = f"Clonelab auto repository mirroring\nOriginial commit details:\ncommit {current_commit["commit"]}\nAuthor: {current_commit["author"]}\ndate: {current_commit["date"]}\nmessage: {current_commit["message"]}"
         self.commit(commit_msg)
         self.push()
 
         # git switch - (go back to main/exit detached head)
         self.sync()
+
+    def rsync(self):
+        # Rsyncs original repo to mirror repo (excluding .git/)
+        src = self.dir + "/"
+        dest = self.mirror_dir + "/"
+        subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
 
     def add(self):
         # Runs the 'git commit -a' command to stage all changes on mirror repo
