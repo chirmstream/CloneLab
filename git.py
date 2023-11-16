@@ -114,8 +114,12 @@ class Repo:
 
     def sync(self):
         commits, mirror_commits = self.get_commits()
-        # Process mirror_commits, cross reference messages (which contain information regarding original commit \
-        # hashes, authors, and messages.)
+        for _ in range(len(mirror_commits)):
+            current_commit = commits[_]
+            current_mirror_commit = mirror_commits[_]
+            # Process mirror_commits, cross reference messages (which contain information regarding original commit \
+            # hashes, authors, and messages.)
+
         # Go back in time until they match (if they do at all.)
         # Starting with the first commit that does not match, checkout said commit on original repo,
         # rsync original repo commit to mirror
@@ -126,6 +130,14 @@ class Repo:
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
         subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
+
+        self.add()
+        commit_msg = f"Clonelab auto repository mirroring\nOriginial commit details:\ncommit {current_commit["commit"]}\nAuthor: {current_commit["author"]}\ndate: {current_commit["date"]}\nmessage: {current_commit["message"]}"
+        self.commit(commit_msg)
+        self.push()
+
+        # git switch - (go back to main/exit detached head)
+        self.sync()
 
     def add(self):
         # Runs the 'git commit -a' command to stage all changes on mirror repo
