@@ -65,11 +65,29 @@ class Repo:
         self.reset_directory()
 
     def get_commits(self):
+        # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
         os.chdir(f"{self.dir}")
-        self.log = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+        log = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
 
         os.chdir(f"{self.mirror_dir}")
-        self.mirror_log = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+        mirror_log = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+
+        commits = []
+        current_commit = {
+            "commit":"",
+            "author":"",
+            "message":""
+        }
+        for line in log:
+            if line[:7] == "commit ":
+                commit = line[7:]
+                current_commit["commit"] = commit
+            if line[:8] == "Author: ":
+                author = line[9:]
+                current_commit["author"] = author
+            commits.append(current_commit)
+
+
 
         self.reset_directory()
 
