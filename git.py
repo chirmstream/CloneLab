@@ -44,6 +44,7 @@ class Repo:
         self.reset_directory()
 
     def get(self):
+        print(f"Starting mirroring for {self.url}")
         # Runs the 'git clone' command for original repo
         if len(os.listdir(self.dir)) == 0:
             subprocess.run(['git', 'clone', self.url, self.dir])
@@ -63,20 +64,17 @@ class Repo:
             subprocess.run(['git', 'pull'])
         self.reset_directory()
 
-    def sync(self):
-        # Run git log --reverse > ~/tmp/
-        cwd = os.chdir(os.path.expanduser("~"))
-        os.chdir(cwd)
-        if not os.path.isdir("tmp"):
-            os.makedirs("tmp")
-        os.chdir("tmp")
-        cwd = os.getcwd()
-        log_path = cwd + "/" + "log.txt"
-        mirror_log_path = cwd + "/" + "mirror_log.txt"
+    def get_commits(self):
+        os.chdir(f"{self.dir}")
+        self.log = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+
+        os.chdir(f"{self.mirror_dir}")
+        self.mirror_log = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+
         self.reset_directory()
-        
-        # Get commit history for repo and mirror_repo
-        subprocess(["git", "log", "--reverse", log_path])
+
+    def sync(self):
+        self.get_commits()
 
         # Rsyncs original repo to mirror repo (excluding .git/) and then
         src = self.dir + "/"

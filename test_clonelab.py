@@ -10,7 +10,6 @@ with open("config.csv.example", "r") as csvfile:
     os.chdir("..")
     for row in reader:
         repo = git.Repo(row["original_repository"], row["mirror_repository"])
-        print(f"Starting mirroring for {repo.url}")
         repo.get()
         repo.set_mirror_login(row["mirror_password"])
         repo.sync()
