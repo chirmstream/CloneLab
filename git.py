@@ -72,8 +72,7 @@ class Repo:
         os.chdir(f"{self.mirror_dir}")
         mirror_log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
         mirror_commits = self.process_log(mirror_log_raw)
-
-        self.reset_directory()
+        return commits, mirror_commits
 
     def process_log(self, log):
         commits = []
@@ -114,7 +113,14 @@ class Repo:
         return s
 
     def sync(self):
-        self.get_commits()
+        commits, mirror_commits = self.get_commits()
+        # Process mirror_commits, cross reference messages (which contain information regarding original commit \
+        # hashes, authors, and messages.)
+        # Go back in time until they match (if they do at all.)
+        # Starting with the first commit that does not match, checkout said commit on original repo,
+        # rsync original repo commit to mirror
+        # add/commit (with message indicating what commit it is copying), and push to remote
+        # Repeat until synced
 
         # Rsyncs original repo to mirror repo (excluding .git/) and then
         src = self.dir + "/"
