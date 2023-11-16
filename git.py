@@ -67,29 +67,51 @@ class Repo:
     def get_commits(self):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
         os.chdir(f"{self.dir}")
-        log = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
-
+        log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+        commits = self.process_log(log_raw)
         os.chdir(f"{self.mirror_dir}")
-        mirror_log = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+        mirror_log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+        mirror_commits = self.process_log(mirror_log_raw)
 
+        self.reset_directory()
+
+    def process_log(self, log):
         commits = []
         current_commit = {
             "commit":"",
             "author":"",
+            "date":"",
             "message":""
         }
-        for line in log:
-            if line[:7] == "commit ":
-                commit = line[7:]
+        for _ in range(len(log)):
+            if log[_][:7] == "commit ":
+                commit = log[_][7:]
                 current_commit["commit"] = commit
-            if line[:8] == "Author: ":
-                author = line[9:]
+            elif log[_][:8] == "Author: ":
+                author = log[_][8:]
                 current_commit["author"] = author
-            commits.append(current_commit)
+            elif log[_][:6] == "Date: ":
+                date = log[_][8:]
+                current_commit["date"] = date
+            else:
+                try:
+                    if log[_ + 1][:7] != "commit ":
+                        message = current_commit["message"] + log[_]
+                        current_commit["message"] = self.add_newline(message)
+                    else:
+                        message = current_commit["message"] + log[_]
+                        current_commit["message"] = self.add_newline(message)
+                        commits.append(current_commit)
+                        current_commit["message"] = ""
+                except:
+                    message = current_commit["message"] + log[_]
+                    current_commit["message"] = self.add_newline(message)
+                    commits.append(current_commit)
+        return commits
 
-
-
-        self.reset_directory()
+    def add_newline(self, s):
+        s = s + "\n"
+        return s
 
     def sync(self):
         self.get_commits()
