@@ -95,11 +95,11 @@ class Repo:
             else:
                 try:
                     if log[_ + 1][:7] != "commit ":
-                        message = current_commit["message"] + log[_]
-                        current_commit["message"] = self.add_newline(message)
+                        message = current_commit["message"] + log[_][4:]
+                        current_commit["message"] = message
                     else:
                         message = current_commit["message"] + log[_]
-                        current_commit["message"] = self.add_newline(message)
+                        current_commit["message"] = message
                         commits.append(current_commit)
                         current_commit["message"] = ""
                 except:
@@ -119,22 +119,29 @@ class Repo:
             current_commit = commits[_]
             current_mirror_commit = mirror_commits[_]
             commit_hash = current_commit["commit"]
-            #... = mirror commit_info
+            if self.commits_match(current_commit, current_mirror_commit) == False:
 
-            os.chdir(f"{self.dir}")
-            subprocess.run(["git", "checkout", commit_hash])
 
-            os.chdir(f"{self.mirror_dir}")
-            subprocess.run(["git", "rebase", "-i"])
+                #... = mirror commit_info
 
-            self.rsync()
+                os.chdir(f"{self.dir}")
+                subprocess.run(["git", "checkout", commit_hash])
 
-            self.add()
-            subprocess.run(["git", "rebase", "--continue"])
+                os.chdir(f"{self.mirror_dir}")
+                subprocess.run(["git", "rebase", "-i"])
 
-            os.chdir(f"{self.dir}")
-            subprocess.run(["git", "switch", "-"])
-            self.push()
+                self.rsync()
+
+                self.add()
+                subprocess.run(["git", "rebase", "--continue"])
+
+                os.chdir(f"{self.dir}")
+                subprocess.run(["git", "switch", "-"])
+                self.push()
+
+
+           
+
 
 
 
@@ -168,6 +175,12 @@ class Repo:
 
         # git switch - (go back to main/exit detached head)
         self.sync()
+
+    def commits_match(self, current_commit, mirror_commit):
+        commit_hash = current_commit["commit"]
+        if commit_hash in mirror_commit["message"]:
+                return True
+        return False
 
     def rsync(self):
         # Rsyncs original repo to mirror repo (excluding .git/)
