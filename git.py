@@ -137,13 +137,16 @@ class Repo:
                 # Remove all contents in mirror repo
                 contents = []
                 for root, dirs, files in os.walk(f"{self.mirror_dir}", topdown=True):
+                    git_dir = os.path.join(f"{self.mirror_dir}", ".git")
                     for name in files:
-                        contents.append((os.path.join(root, name)))
-                        print(os.path.join(root, name))
-                    for name in dirs:
-                        if name != ".git":
-                            contents.append((os.path.join(root, name)))
-                            print(os.path.join(root, name))
+                        item = os.path.join(root, name)
+                        if item in git_dir:
+                            print(f"Skipping {item}")
+                        else:
+                            print(f"Deleting {item}")
+                            os.remove(item)
+
+
                 #self.rsync()
 
                 self.add()
