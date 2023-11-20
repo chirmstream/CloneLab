@@ -134,6 +134,16 @@ class Repo:
                 os.chdir(f"{self.mirror_dir}")
                 subprocess.run(["git", "rebase"])
 
+                # Remove all contents in mirror repo
+                contents = []
+                for root, dirs, files in os.walk(f"{self.mirror_dir}", topdown=True):
+                    for name in files:
+                        contents.append((os.path.join(root, name)))
+                        print(os.path.join(root, name))
+                    for name in dirs:
+                        if name != ".git":
+                            contents.append((os.path.join(root, name)))
+                            print(os.path.join(root, name))
                 #self.rsync()
 
                 self.add()
