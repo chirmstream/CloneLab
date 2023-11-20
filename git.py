@@ -137,7 +137,7 @@ class Repo:
                 #self.rsync()
 
                 self.add()
-                self.commit(f"CloneLab autocommit\nCommit: {commit_hash}")
+                self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {commit_hash}")
 
                 os.chdir(f"{self.dir}")
                 subprocess.run(["git", "switch", "-"])
