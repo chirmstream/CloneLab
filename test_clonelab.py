@@ -4,7 +4,7 @@ import csv
 
 
 # Sync mirror repors
-with open("config.csv.example", "r") as csvfile:
+with open("config.csv", "r") as csvfile:
     reader = csv.DictReader(csvfile)
     fieldnames = reader.fieldnames
     os.chdir("..")
