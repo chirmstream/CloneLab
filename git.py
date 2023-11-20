@@ -129,14 +129,15 @@ class Repo:
 
                 os.chdir(f"{self.dir}")
                 subprocess.run(["git", "checkout", commit_hash])
+                # May need to add a command to 'close' the checkout?
 
                 os.chdir(f"{self.mirror_dir}")
-                subprocess.run(["git", "rebase", "-i"])
+                subprocess.run(["git", "rebase"])
 
-                self.rsync()
+                #self.rsync()
 
                 self.add()
-                subprocess.run(["git", "rebase", "--continue"])
+                self.commit(f"CloneLab autocommit\nCommit: {commit_hash}")
 
                 os.chdir(f"{self.dir}")
                 subprocess.run(["git", "switch", "-"])
