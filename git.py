@@ -122,6 +122,8 @@ class Repo:
             current_commit = commits[_]
             current_mirror_commit = mirror_commits[_]
             commit_hash = current_commit["commit"]
+
+            # If mirror_commit_info != current_commit:
             if self.commits_match(current_commit, current_mirror_commit) == False:
 
 
@@ -140,14 +142,14 @@ class Repo:
                     git_dir = os.path.join(f"{self.mirror_dir}", ".git")
                     for name in files:
                         item = os.path.join(root, name)
-                        if item in git_dir:
+                        if git_dir in item:
                             print(f"Skipping {item}")
                         else:
                             print(f"Deleting {item}")
                             os.remove(item)
 
 
-                #self.rsync()
+                self.rsync()
 
                 self.add()
                 self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {commit_hash}")
@@ -160,17 +162,6 @@ class Repo:
            
 
 
-
-
-            #if mirror_commit_info != current_commit:
-                #git checkout current_commit["commit"]
-                #git rebase -i
-                #rsync
-                #git add all files
-                #git rebase --continue
-                #git switch -
-                #git checkout current_commit+1["commit"]
-                #...
             # Process mirror_commits, cross reference messages (which contain information regarding original commit \
             # hashes, authors, and messages.)
 
@@ -180,18 +171,6 @@ class Repo:
         # add/commit (with message indicating what commit it is copying), and push to remote
         # Repeat until synced
 
-        # Rsyncs original repo to mirror repo (excluding .git/) and then
-        src = self.dir + "/"
-        dest = self.mirror_dir + "/"
-        subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
-
-        self.add()
-        #commit_msg = f"Clonelab auto repository mirroring\nOriginial commit details:\ncommit {current_commit["commit"]}\nAuthor: {current_commit["author"]}\ndate: {current_commit["date"]}\nmessage: {current_commit["message"]}"
-        self.commit(commit_msg)
-        self.push()
-
-        # git switch - (go back to main/exit detached head)
-        self.sync()
 
     def commits_match(self, current_commit, mirror_commit):
         commit_hash = current_commit["commit"]
