@@ -67,10 +67,10 @@ class Repo:
     def get_commits(self):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
         os.chdir(f"{self.dir}")
-        log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+        log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
         commits = self.process_log(log_raw)
         os.chdir(f"{self.mirror_dir}")
-        mirror_log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8").split("\n")
+        mirror_log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
         mirror_commits = self.process_log(mirror_log_raw)
         return commits, mirror_commits
 
