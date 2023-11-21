@@ -152,7 +152,7 @@ class Repo:
                 self.rsync()
 
                 self.add()
-                self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {commit_hash}")
+                self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {commit_hash}\nOriginal Author: {current_commit['author']}")
 
                 os.chdir(f"{self.dir}")
                 subprocess.run(["git", "switch", "-"])
