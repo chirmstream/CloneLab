@@ -44,6 +44,7 @@ class Repo:
         self.reset_directory()
 
     def get(self):
+        print(f"Starting mirroring for {self.url}")
         # Runs the 'git clone' command for original repo
         if len(os.listdir(self.dir)) == 0:
             subprocess.run(['git', 'clone', self.url, self.dir])
@@ -63,8 +64,122 @@ class Repo:
             subprocess.run(['git', 'pull'])
         self.reset_directory()
 
+    def get_commits(self):
+        # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
+        os.chdir(f"{self.dir}")
+        log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
+        commits = self.process_log(log_raw)
+        os.chdir(f"{self.mirror_dir}")
+        mirror_log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
+        mirror_commits = self.process_log(mirror_log_raw)
+        return commits, mirror_commits
+
+    def process_log(self, log):
+        commits = []
+        current_commit = {
+            "commit":"",
+            "author":"",
+            "date":"",
+            "message":""
+        }
+        for _ in range(len(log)):
+            line = log[_]
+            if line[:7] == "commit ":
+                commit = line[7:]
+                current_commit["commit"] = commit
+            elif line[:8] == "Author: ":
+                author = line[8:]
+                current_commit["author"] = author
+            elif line[:6] == "Date: ":
+                date = line[8:]
+                current_commit["date"] = date
+            else:
+                try:
+                    if log[_ + 1][:7] != "commit ":
+                        message = current_commit["message"] + line[4:]
+                        current_commit["message"] = message
+                    else:
+                        message = current_commit["message"] + line
+                        current_commit["message"] = message
+                        next_commit = current_commit.copy()
+                        commits.append(next_commit)
+                        current_commit["message"] = ""
+                except:
+                    message = current_commit["message"] + line
+                    current_commit["message"] = self.add_newline(message)
+                    next_commit = current_commit.copy()
+                    commits.append(next_commit)
+        return commits
+
+    def add_newline(self, s):
+        s = s + "\n"
+        return s
+
     def sync(self):
-        # Rsyncs original repo to mirror repo (excluding .git/) and then
+        # https://www.codecademy.com/resources/docs/git/rebase
+        commits, mirror_commits = self.get_commits()
+        for _ in range(len(mirror_commits)):
+            current_commit = commits[_]
+            current_mirror_commit = mirror_commits[_]
+            commit_hash = current_commit["commit"]
+
+            # If mirror_commit_info != current_commit:
+            if self.commits_match(current_commit, current_mirror_commit) == False:
+
+
+                #... = mirror commit_info
+
+                os.chdir(f"{self.dir}")
+                subprocess.run(["git", "checkout", commit_hash])
+                # May need to add a command to 'close' the checkout?
+
+                os.chdir(f"{self.mirror_dir}")
+                subprocess.run(["git", "rebase"])
+
+                # Remove all contents in mirror repo
+                contents = []
+                for root, dirs, files in os.walk(f"{self.mirror_dir}", topdown=True):
+                    git_dir = os.path.join(f"{self.mirror_dir}", ".git")
+                    for name in files:
+                        item = os.path.join(root, name)
+                        if git_dir in item:
+                            print(f"Skipping {item}")
+                        else:
+                            print(f"Deleting {item}")
+                            os.remove(item)
+
+
+                self.rsync()
+
+                self.add()
+                self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {commit_hash}\nOriginal Author: {current_commit['author']}")
+
+                os.chdir(f"{self.dir}")
+                subprocess.run(["git", "switch", "-"])
+                self.push()
+
+
+           
+
+
+            # Process mirror_commits, cross reference messages (which contain information regarding original commit \
+            # hashes, authors, and messages.)
+
+        # Go back in time until they match (if they do at all.)
+        # Starting with the first commit that does not match, checkout said commit on original repo,
+        # rsync original repo commit to mirror
+        # add/commit (with message indicating what commit it is copying), and push to remote
+        # Repeat until synced
+
+
+    def commits_match(self, current_commit, mirror_commit):
+        commit_hash = current_commit["commit"]
+        if commit_hash in mirror_commit["message"]:
+                return True
+        return False
+
+    def rsync(self):
+        # Rsyncs original repo to mirror repo (excluding .git/)
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
         subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])

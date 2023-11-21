@@ -164,3 +164,4 @@ cython_debug/
 repos/
 
 private.gpg
+config.csv
