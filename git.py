@@ -172,7 +172,7 @@ class Repo:
                 os.chdir(f"{self.mirror_dir}")
                 subprocess.run(["git", "switch", "-c", "temp"])
                 self.add()
-                self.commit(f"{first_commit['message']}\nOriginal Commit Hash: {first_commit['commit']}\nOriginal Author: {first_commit['author']}\nOriginal Date: {first_commit['date']}")
+                self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {current_commit['commit']}\nOriginal Author: {current_commit['author']}\nOriginal Date: {current_commit['date']}")
                 os.chdir(f"{self.mirror_dir}")
                 subprocess.run(["git", "push", "-u", "origin", "temp"])
                 subprocess.run(["git", "push", "-f", "origin", "temp:main"])
