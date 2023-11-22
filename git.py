@@ -118,45 +118,82 @@ class Repo:
     def sync(self):
         # https://www.codecademy.com/resources/docs/git/rebase
         commits, mirror_commits = self.get_commits()
-        for _ in range(len(mirror_commits)):
+        # Check first commit
+        first_commit = commits[0]
+        first_mirror_commit = mirror_commits[0]
+        if self.commits_match(first_commit, first_mirror_commit) == False:
+            first_commit_hash = first_commit['commit']
+            os.chdir(f"{self.dir}")
+            subprocess.run(["git", "checkout", first_commit_hash])
+
+            os.chdir(f"{self.mirror_dir}")
+            # Create orphan branch 'temp', and delete everthing
+            subprocess.run(["git", "switch", "--orphan", "temp"])
+            subprocess.run(["git", "rm", "-rf", "."])
+            subprocess.run(["git", "clean", "-fd"])
+
+            self.rsync()
+            self.add()
+            self.commit(f"{first_commit['message']}\nOriginal Commit Hash: {first_commit['commit']}\nOriginal Author: {first_commit['author']}\nOriginal Date: {first_commit['date']}")
+
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "push", "-u", "origin", "temp"])
+
+            subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+            subprocess.run(["git", "switch", "main"])
+            subprocess.run(["git", "branch", "--delete", "temp"])
+            subprocess.run(["git", "push", "origin", "--delete", "temp"])
+
+            os.chdir(f"{self.dir}")
+            subprocess.run(["git", "switch", "-"])
+
+
+        for _ in range(len(commits)):
             current_commit = commits[_]
-            current_mirror_commit = mirror_commits[_]
-            commit_hash = current_commit["commit"]
+            try:
+                current_mirror_commit = mirror_commits[_]
+            except:
+                # If mirror repo has fewer commits than original repo make a fake commit to procede:
+                mirror_commits.append(mirror_commits[_ - 1])
+                current_mirror_commit = mirror_commits[_]
 
-            # If mirror_commit_info != current_commit:
             if self.commits_match(current_commit, current_mirror_commit) == False:
-
-
-                #... = mirror commit_info
-
+                # Checkout last matching mirror repo commit
+                os.chdir(f"{self.mirror_dir}")
+                subprocess.run(["git", "checkout", f"{mirror_commits[_ - 1]['commit']}"])
+                # Checkout current repo commit
                 os.chdir(f"{self.dir}")
-                subprocess.run(["git", "checkout", commit_hash])
-                # May need to add a command to 'close' the checkout?
+                subprocess.run(["git", "checkout", f"{current_commit['commit']}"])
 
                 os.chdir(f"{self.mirror_dir}")
-                subprocess.run(["git", "rebase"])
-
-                # Remove all contents in mirror repo
-                contents = []
-                for root, dirs, files in os.walk(f"{self.mirror_dir}", topdown=True):
-                    git_dir = os.path.join(f"{self.mirror_dir}", ".git")
-                    for name in files:
-                        item = os.path.join(root, name)
-                        if git_dir in item:
-                            print(f"Skipping {item}")
-                        else:
-                            print(f"Deleting {item}")
-                            os.remove(item)
-
-
+                subprocess.run(["git", "rm", "-rf", "."])
                 self.rsync()
 
+                os.chdir(f"{self.mirror_dir}")
+                subprocess.run(["git", "switch", "-c", "temp"])
                 self.add()
-                self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {commit_hash}\nOriginal Author: {current_commit['author']}")
+                self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {current_commit['commit']}\nOriginal Author: {current_commit['author']}\nOriginal Date: {current_commit['date']}")
+                os.chdir(f"{self.mirror_dir}")
+                subprocess.run(["git", "push", "-u", "origin", "temp"])
+                subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+                subprocess.run(["git", "switch", "main"])
+                subprocess.run(["git", "branch", "--delete", "temp"])
+                subprocess.run(["git", "push", "origin", "--delete", "temp"])
 
                 os.chdir(f"{self.dir}")
                 subprocess.run(["git", "switch", "-"])
-                self.push()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
            
