@@ -193,7 +193,7 @@ class Repo:
             os.chdir(f"{self.mirror_dir}")
             subprocess.run(["git", "checkout", f"{mirror_commits[last_correct]['commit']}"])
             subprocess.run(["git", "switch", "-c", "temp"])
-            for _ in range(last_correct, len(commits)):
+            for _ in range(last_correct + 1, len(commits)):
                 os.chdir(f"{self.dir}")
                 subprocess.run(["git", "checkout", f"{commits[_]['commit']}"])
 
@@ -209,8 +209,6 @@ class Repo:
             subprocess.run(["git", "switch", "main"])
             subprocess.run(["git", "branch", "--delete", "temp"])
             subprocess.run(["git", "push", "origin", "--delete", "temp"])
-
-
 
 
 
