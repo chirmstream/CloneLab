@@ -148,6 +148,7 @@ class Repo:
             subprocess.run(["git", "switch", "-"])
 
 
+        # Check existing commits
         for _ in range(len(commits)):
             current_commit = commits[_]
             try:
@@ -160,6 +161,7 @@ class Repo:
             if self.commits_match(current_commit, current_mirror_commit) == False:
                 # Checkout last matching mirror repo commit
                 os.chdir(f"{self.mirror_dir}")
+                # This works unless mirror repo has fewer commits than the original repo.  Need to add code to handle accordingly.
                 subprocess.run(["git", "checkout", f"{mirror_commits[_ - 1]['commit']}"])
                 # Checkout current repo commit
                 os.chdir(f"{self.dir}")
@@ -173,15 +175,18 @@ class Repo:
                 subprocess.run(["git", "switch", "-c", "temp"])
                 self.add()
                 self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {current_commit['commit']}\nOriginal Author: {current_commit['author']}\nOriginal Date: {current_commit['date']}")
-                os.chdir(f"{self.mirror_dir}")
-                subprocess.run(["git", "push", "-u", "origin", "temp"])
-                subprocess.run(["git", "push", "-f", "origin", "temp:main"])
-                subprocess.run(["git", "switch", "main"])
-                subprocess.run(["git", "branch", "--delete", "temp"])
-                subprocess.run(["git", "push", "origin", "--delete", "temp"])
 
                 os.chdir(f"{self.dir}")
                 subprocess.run(["git", "switch", "-"])
+
+        os.chdir(f"{self.mirror_dir}")
+        subprocess.run(["git", "push", "-u", "origin", "temp"])
+        subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+        subprocess.run(["git", "switch", "main"])
+        subprocess.run(["git", "branch", "--delete", "temp"])
+        subprocess.run(["git", "push", "origin", "--delete", "temp"])
+
+
 
 
 
