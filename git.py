@@ -148,70 +148,70 @@ class Repo:
             subprocess.run(["git", "switch", "-"])
 
 
-        # Check existing commits
-        for _ in range(len(commits)):
-            current_commit = commits[_]
-            try:
+        if len(mirror_commits) >= len(commits):
+            # Check existing commits
+            for _ in range(len(commits)):
+                current_commit = commits[_]
                 current_mirror_commit = mirror_commits[_]
-            except:
-                # If mirror repo has fewer commits than original repo make a fake commit to procede:
-                mirror_commits.append(mirror_commits[_ - 1])
-                current_mirror_commit = mirror_commits[_]
+                if self.commits_match(current_commit, current_mirror_commit) == False:
+                    # Checkout last matching mirror repo commit
+                    os.chdir(f"{self.mirror_dir}")
+                    # This works unless mirror repo has fewer commits than the original repo.  Need to add code to handle accordingly.
+                    subprocess.run(["git", "checkout", f"{mirror_commits[_ - 1]['commit']}"])
+                    # Checkout current repo commit
+                    os.chdir(f"{self.dir}")
+                    subprocess.run(["git", "checkout", f"{current_commit['commit']}"])
 
-            if self.commits_match(current_commit, current_mirror_commit) == False:
-                # Checkout last matching mirror repo commit
-                os.chdir(f"{self.mirror_dir}")
-                # This works unless mirror repo has fewer commits than the original repo.  Need to add code to handle accordingly.
-                subprocess.run(["git", "checkout", f"{mirror_commits[_ - 1]['commit']}"])
-                # Checkout current repo commit
+                    self.rsync()
+
+                    os.chdir(f"{self.mirror_dir}")
+                    subprocess.run(["git", "switch", "-c", "temp"])
+                    self.add()
+                    self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {current_commit['commit']}\nOriginal Author: {current_commit['author']}\nOriginal Date: {current_commit['date']}")
+
+                    os.chdir(f"{self.dir}")
+                    subprocess.run(["git", "switch", "-"])
+
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "push", "-u", "origin", "temp"])
+            subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+            subprocess.run(["git", "switch", "main"])
+            subprocess.run(["git", "branch", "--delete", "temp"])
+            subprocess.run(["git", "push", "origin", "--delete", "temp"])
+
+
+        # Do this when fewer mirror commits exist than original repo
+        else:
+            # Start by finding the last correct commit
+            for _ in range(len(mirror_commits)):
+                current_commit = commits[_]
+                current_mirror_commit = mirror_commits[_]
+                if self.commits_match(current_commit, current_mirror_commit) == False:
+                    last_correct = _ - 1
+
+
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "checkout", f"{mirror_commits[last_correct]['commit']}"])
+            subprocess.run(["git", "switch", "-c", "temp"])
+            for _ in range(last_correct, len(commits)):
                 os.chdir(f"{self.dir}")
-                subprocess.run(["git", "checkout", f"{current_commit['commit']}"])
+                subprocess.run(["git", "checkout", f"{commits[_]['commit']}"])
 
-                os.chdir(f"{self.mirror_dir}")
-                subprocess.run(["git", "rm", "-rf", "."])
                 self.rsync()
 
                 os.chdir(f"{self.mirror_dir}")
-                subprocess.run(["git", "switch", "-c", "temp"])
                 self.add()
                 self.commit(f"{current_commit['message']}\nOriginal Commit Hash: {current_commit['commit']}\nOriginal Author: {current_commit['author']}\nOriginal Date: {current_commit['date']}")
 
-                os.chdir(f"{self.dir}")
-                subprocess.run(["git", "switch", "-"])
-
-        os.chdir(f"{self.mirror_dir}")
-        subprocess.run(["git", "push", "-u", "origin", "temp"])
-        subprocess.run(["git", "push", "-f", "origin", "temp:main"])
-        subprocess.run(["git", "switch", "main"])
-        subprocess.run(["git", "branch", "--delete", "temp"])
-        subprocess.run(["git", "push", "origin", "--delete", "temp"])
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "push", "-u", "origin", "temp"])
+            subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+            subprocess.run(["git", "switch", "main"])
+            subprocess.run(["git", "branch", "--delete", "temp"])
+            subprocess.run(["git", "push", "origin", "--delete", "temp"])
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-           
-
-
-            # Process mirror_commits, cross reference messages (which contain information regarding original commit \
-            # hashes, authors, and messages.)
-
-        # Go back in time until they match (if they do at all.)
-        # Starting with the first commit that does not match, checkout said commit on original repo,
-        # rsync original repo commit to mirror
-        # add/commit (with message indicating what commit it is copying), and push to remote
-        # Repeat until synced
 
 
     def commits_match(self, current_commit, mirror_commit):
@@ -221,7 +221,9 @@ class Repo:
         return False
 
     def rsync(self):
-        # Rsyncs original repo to mirror repo (excluding .git/)
+        # remove mirror repository files, then rsync original repository files to mirror
+        os.chdir(f"{self.mirror_dir}")
+        subprocess.run(["git", "rm", "-rf", "."])
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
         subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
