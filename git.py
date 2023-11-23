@@ -2,6 +2,7 @@ import subprocess
 import os
 import re
 import sys
+from shutil import rmtree
 
 
 class Repo:
@@ -146,6 +147,10 @@ class Repo:
 
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "switch", "-"])
+
+            # Delete mirror repository and reclone from remote
+            rmtree(f"{self.mirror_dir}")
+            subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
 
 
         if len(mirror_commits) >= len(commits):
