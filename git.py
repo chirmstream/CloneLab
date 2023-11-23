@@ -117,41 +117,34 @@ class Repo:
         return s
 
     def sync(self):
-        # https://www.codecademy.com/resources/docs/git/rebase
+        # Syncs first commit only
         commits, mirror_commits = self.get_commits()
-        # Check first commit
         first_commit = commits[0]
         first_mirror_commit = mirror_commits[0]
         if self.commits_match(first_commit, first_mirror_commit) == False:
             first_commit_hash = first_commit['commit']
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "checkout", first_commit_hash])
-
             os.chdir(f"{self.mirror_dir}")
             # Create orphan branch 'temp', and delete everthing
             subprocess.run(["git", "switch", "--orphan", "temp"])
             subprocess.run(["git", "rm", "-rf", "."])
             subprocess.run(["git", "clean", "-fd"])
-
             self.rsync()
             self.add()
             self.commit(f"{first_commit['message']}\nOriginal Commit Hash: {first_commit['commit']}\nOriginal Author: {first_commit['author']}\nOriginal Date: {first_commit['date']}")
-
+            # Pushes temp branch, copies temp branch to main, then deletes temp branch
             os.chdir(f"{self.mirror_dir}")
             subprocess.run(["git", "push", "-u", "origin", "temp"])
-
             subprocess.run(["git", "push", "-f", "origin", "temp:main"])
             subprocess.run(["git", "switch", "main"])
             subprocess.run(["git", "branch", "--delete", "temp"])
             subprocess.run(["git", "push", "origin", "--delete", "temp"])
-
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "switch", "-"])
-
             # Delete mirror repository and reclone from remote
             rmtree(f"{self.mirror_dir}")
             subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
-
 
         if len(mirror_commits) >= len(commits):
             # Check existing commits
