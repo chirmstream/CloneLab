@@ -146,6 +146,51 @@ class Repo:
             rmtree(f"{self.mirror_dir}")
             subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
 
+        # Sync remaining commits
+        last_correct_commit = first_commit
+        last_correct_mirror_commit = first_mirror_commit
+        i = 0
+        for commit in commits:
+            try:
+                mirror_commit = mirror_comits[i]
+            except:
+                last_correct_comit = commit[i - 1]
+                last_correct_mirror_commit = mirror_commits[i - 1]
+            if self.commits_match(commit, mirror_commit) == True:
+                last_correct_commit = commit
+                last_correct_mirror_commit = mirror_commits[i]
+            else:
+                last_correct_comit = commit[i - 1]
+                last_correct_mirror_commit = mirror_commits[i - 1]
+        
+        for _ in range(i, len(commits)):
+            os.chdir(f"{self.dir}")
+            subprocess.run(["git", "checkout", commits[_]['commit']])
+            # Checkout last correct mirror_commit as new branch temp
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_]['commit']])
+            self.sync()
+            self.add()
+            self.commit(f"{commit[_]['message']}\nOriginal Commit Hash: {commit[_]['commit']}\nOriginal Author: {commit[_]['author']}\nOriginal Date: {commit[_]['date']}")
+
+        # Pushes temp branch, copies remaining commits in temp branch to main, then deletes temp branch
+        os.chdir(f"{self.mirror_dir}")
+        subprocess.run(["git", "push", "-u", "origin", "temp"])
+        subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+        subprocess.run(["git", "switch", "main"])
+        subprocess.run(["git", "branch", "--delete", "temp"])
+        subprocess.run(["git", "push", "origin", "--delete", "temp"])
+        os.chdir(f"{self.dir}")
+        subprocess.run(["git", "switch", "-"])
+
+
+
+
+
+
+
+
+
         if len(mirror_commits) >= len(commits):
             # Check existing commits
             for _ in range(len(commits)):
