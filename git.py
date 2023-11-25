@@ -169,7 +169,7 @@ class Repo:
                 break
         
         # Create temp branch for mirror repo
-        os.chdir(f"{self.mirror_dir}")
+        os.chdir(f"{self.mirror_dir}") # directory does not exist coming from loop that creates first commit for somereason.  Git clone never went?
         subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
         # rsync changes over.
         for _ in range(i, len(commits)):
@@ -187,15 +187,13 @@ class Repo:
         subprocess.run(["git", "switch", "main"])
         subprocess.run(["git", "branch", "--delete", "temp"])
         subprocess.run(["git", "push", "origin", "--delete", "temp"])
+        # Error switching back to main for original repo
         os.chdir(f"{self.dir}")
         subprocess.run(["git", "switch", "-"])
 
-
-
-
-
-
-
+    # It crashed doing bitcoin, so maybe batch them in commits of 100?
+    # Even though it didn't work on 1 go, after deleteing the repo files (maybe I did delete them?) and rerunning it sucsessfully cloned a repo with ~200 commits.
+    # Need to rewrite commit message to have better formatting for merging pull requsts.
 
 
     def commits_match(self, current_commit, mirror_commit):
