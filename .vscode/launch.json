@@ -5,20 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Unix",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": true
+        "name": "Python: Current File (Integrated Terminal)",
+        "type": "python",
+        "request": "launch",
+        "program": "${file}",
+        "console": "integratedTerminal"
         },
         {
-            "name": "Python: WSL",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "externalTerminal",
-            "justMyCode": true
+        "name": "Python: Current File (External Terminal)",
+        "type": "python",
+        "request": "launch",
+        "program": "${file}",
+        "console": "externalTerminal"
         }
     ]
 }
