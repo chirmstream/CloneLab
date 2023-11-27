@@ -13,9 +13,6 @@ with open("config.csv", "r") as csvfile:
         repo.get()
         repo.set_mirror_login(row["mirror_password"])
         repo.sync()
-        repo.add()
-        repo.commit("CloneLab autocommit")
-        repo.push()
         print(f"{repo.url} successfully mirrored to {repo.mirror_url}")
 
 print("CLoneLab finished!  All repositories have been mirrored.")

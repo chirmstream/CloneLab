@@ -183,9 +183,6 @@ class Repo:
 
         # Pushes temp branch, copies remaining commits in temp branch to main, then deletes temp branch
         os.chdir(f"{self.mirror_dir}")
-        # Somewhere getting error: src refspec temp does not match any
-        # error: failed to push some refs to https//:github.mirror.repo.git
-        # error: branch temp not found
         subprocess.run(["git", "push", "-u", "origin", "temp"])
         subprocess.run(["git", "push", "-f", "origin", "temp:main"])
         subprocess.run(["git", "switch", "main"])
