@@ -132,7 +132,14 @@ class Repo:
             subprocess.run(["git", "clean", "-fd"])
             self.rsync()
             self.add()
-            self.commit(f"{first_commit['message']}\nOriginal Commit Hash: {first_commit['commit']}\nOriginal Author: {first_commit['author']}\nOriginal Date: {first_commit['date']}")
+            message = (
+                f"{first_commit['message']}\n"
+                f"Original Commit Hash: {first_commit['commit']}\n"
+                f"Original Author: {first_commit['author']}\n"
+                f"Original Date: {first_commit['date']}\n"
+                f"Repository {self.url} cloned using CloneLab"
+            )
+            self.commit(message)
             # Pushes temp branch, copies temp branch to main, then deletes temp branch
             os.chdir(f"{self.mirror_dir}")
             subprocess.run(["git", "push", "-u", "origin", "temp"])
@@ -179,6 +186,7 @@ class Repo:
             self.rsync()
             os.chdir(f"{self.mirror_dir}")
             self.add()
+
             self.commit(f"{commits[_]['message']}\nOriginal Commit Hash: {commits[_]['commit']}\nOriginal Author: {commits[_]['author']}\nOriginal Date: {commits[_]['date']}")
 
         # Pushes temp branch, copies remaining commits in temp branch to main, then deletes temp branch
