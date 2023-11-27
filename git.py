@@ -145,6 +145,8 @@ class Repo:
             # Delete both repos and reclone from remote
             rmtree(f"{self.dir}")
             rmtree(f"{self.mirror_dir}")
+            # fatal: Unable to read current working directory: No such file or directory
+            # Because the directory got removed it won't clone?
             subprocess.run(['git', 'clone', self.url, self.dir])
             subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
 
