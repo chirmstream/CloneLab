@@ -145,8 +145,7 @@ class Repo:
             # Delete both repos and reclone from remote
             rmtree(f"{self.dir}")
             rmtree(f"{self.mirror_dir}")
-            # fatal: Unable to read current working directory: No such file or directory
-            # Because the directory got removed it won't clone?
+            self.set_dirs()
             subprocess.run(['git', 'clone', self.url, self.dir])
             subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
 
@@ -184,6 +183,9 @@ class Repo:
 
         # Pushes temp branch, copies remaining commits in temp branch to main, then deletes temp branch
         os.chdir(f"{self.mirror_dir}")
+        # Somewhere getting error: src refspec temp does not match any
+        # error: failed to push some refs to https//:github.mirror.repo.git
+        # error: branch temp not found
         subprocess.run(["git", "push", "-u", "origin", "temp"])
         subprocess.run(["git", "push", "-f", "origin", "temp:main"])
         subprocess.run(["git", "switch", "main"])
