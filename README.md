@@ -15,3 +15,13 @@ gpg --import-options restore --import private.gpg
 docker run \
     -v /example-host/config:/home/CloneLab/config \
     -v /example-host/data:/root/CloneLab-data
+
+
+## Python virtual enviroment
+Create enviroment:
+
+    python3 -m venv venv
+
+Activate enviroment:
+
+    . venv/bin/activate
