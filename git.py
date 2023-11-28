@@ -186,9 +186,14 @@ class Repo:
             self.rsync()
             os.chdir(f"{self.mirror_dir}")
             self.add()
-
-            self.commit(f"{commits[_]['message']}\nOriginal Commit Hash: {commits[_]['commit']}\nOriginal Author: {commits[_]['author']}\nOriginal Date: {commits[_]['date']}")
-
+            message = (
+                f"{commits[_]['message']}\n"
+                f"Original Commit Hash: {commits[_]['commit']}\n"
+                f"Original Author: {commits[_]['author']}\n"
+                f"Original Date: {commits[_]['date']}\n"
+                f"Repository {self.url} cloned using CloneLab"
+            )
+            self.commit(message)
         # Pushes temp branch, copies remaining commits in temp branch to main, then deletes temp branch
         os.chdir(f"{self.mirror_dir}")
         subprocess.run(["git", "push", "-u", "origin", "temp"])
