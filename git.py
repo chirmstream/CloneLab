@@ -118,9 +118,7 @@ class Repo:
         s = s + "\n"
         return s
 
-    def sync(self):
-        self.sync_first_commit()
-        print(f"Mirroring remaining commits...")
+    def find_last_correct(self):
         commits, mirror_commits = self.get_commits()
         last_correct_commit = commits[0]
         last_correct_mirror_commit = mirror_commits[0]
@@ -140,12 +138,27 @@ class Repo:
                 last_correct_commit = commits[i - 1]
                 last_correct_mirror_commit = mirror_commits[i - 1]
                 break
-        
+        return i, last_correct_mirror_commit
+
+    def sync(self):
+        self.sync_first_commit()
+        print(f"Mirroring remaining commits...")
+        commits, mirror_commits = self.get_commits()
+        i, last_correct_mirror_commit = self.find_last_correct()
         # Create temp branch for mirror repo
         os.chdir(f"{self.mirror_dir}") # directory does not exist coming from loop that creates first commit for somereason.  Git clone never went?
         subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
-        # rsync changes over.
+        commits_made = 0
         for _ in range(i, len(commits)):
+            if commits_made > 15:
+                self.update()
+                os.chdir(f"{self.mirror_dir}")
+                rmtree(f"{self.mirror_dir}")
+                self.set_dirs()
+                subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
+                i, last_correct_mirror_commit = self.find_last_correct()
+                subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
+                commits_made = 0
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "checkout", commits[_]['commit']])
             self.rsync()
@@ -159,11 +172,10 @@ class Repo:
                 f"Repository {self.url} cloned using CloneLab"
             )
             self.commit(message)
+            commits_made = commits_made + 1
         self.update()
         print(f"Successfully mirrored {self.url} to {self.mirror_url}")
 
-    # It crashed doing bitcoin, so maybe batch them in commits of 100?
-    # Even though it didn't work on 1 go, after deleteing the repo files (maybe I did delete them?) and rerunning it sucsessfully cloned a repo with ~200 commits.
     # Need to rewrite commit message to have better formatting for merging pull requsts.
 
     def sync_first_commit(self):
