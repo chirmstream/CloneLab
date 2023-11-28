@@ -159,16 +159,7 @@ class Repo:
                 f"Repository {self.url} cloned using CloneLab"
             )
             self.commit(message)
-        # Pushes temp branch, copies remaining commits in temp branch to main, then deletes temp branch
-        os.chdir(f"{self.mirror_dir}")
-        subprocess.run(["git", "push", "-u", "origin", "temp"])
-        subprocess.run(["git", "push", "-f", "origin", "temp:main"])
-        subprocess.run(["git", "switch", "main"])
-        subprocess.run(["git", "branch", "--delete", "temp"])
-        subprocess.run(["git", "push", "origin", "--delete", "temp"])
-        # Error switching back to main for original repo
-        os.chdir(f"{self.dir}")
-        subprocess.run(["git", "switch", "-"])
+        self.update()
         print(f"Successfully mirrored {self.url} to {self.mirror_url}")
 
     # It crashed doing bitcoin, so maybe batch them in commits of 100?
@@ -199,15 +190,7 @@ class Repo:
                 f"Repository {self.url} cloned using CloneLab"
             )
             self.commit(message)
-            # Pushes temp branch, copies temp branch to main, then deletes temp branch
-            os.chdir(f"{self.mirror_dir}")
-            subprocess.run(["git", "push", "-u", "origin", "temp"])
-            subprocess.run(["git", "push", "-f", "origin", "temp:main"])
-            subprocess.run(["git", "switch", "main"])
-            subprocess.run(["git", "branch", "--delete", "temp"])
-            subprocess.run(["git", "push", "origin", "--delete", "temp"])
-            os.chdir(f"{self.dir}")
-            subprocess.run(["git", "switch", "-"])
+            self.update()
             # Delete both repos and reclone from remote
             self.get()
         else:
@@ -226,6 +209,17 @@ class Repo:
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
         subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
+
+    def update(self):
+            # Pushes temp branch, copies temp branch to main, then deletes temp branch
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "push", "-u", "origin", "temp"])
+            subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+            subprocess.run(["git", "switch", "main"])
+            subprocess.run(["git", "branch", "--delete", "temp"])
+            subprocess.run(["git", "push", "origin", "--delete", "temp"])
+            os.chdir(f"{self.dir}")
+            subprocess.run(["git", "switch", "-"])
 
     def add(self):
         # Runs the 'git commit -a' command to stage all changes on mirror repo
