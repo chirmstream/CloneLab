@@ -50,8 +50,9 @@ class Repo:
         if len(os.listdir(self.dir)) == 0:
             subprocess.run(['git', 'clone', self.url, self.dir])
         else:
-            os.chdir(self.dir)
-            subprocess.run(['git', 'pull'])
+            rmtree(f"{self.dir}")
+            self.set_dirs()
+            subprocess.run(['git', 'clone', self.url, self.dir])
         # Runs the 'git clone' command for mirror repo
         if len(os.listdir(self.mirror_dir)) == 0:
             try: 
@@ -61,8 +62,9 @@ class Repo:
                 url = f"https://{self.mirror_username}:{password}@{self.mirror_domain}/{self.mirror_username}/{self.mirror_name}.git"
                 subprocess.run(['git', 'clone', url, self.mirror_dir])
         else:
-            os.chdir(self.mirror_dir)
-            subprocess.run(['git', 'pull'])
+            rmtree(f"{self.mirror_dir}")
+            self.set_dirs()
+            subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
         self.reset_directory()
 
     def get_commits(self):
