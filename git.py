@@ -119,52 +119,11 @@ class Repo:
         return s
 
     def sync(self):
-        # Syncs first commit only
-        print(f"Mirroring first commit...")
-        commits, mirror_commits = self.get_commits()
-        first_commit = commits[0]
-        first_mirror_commit = mirror_commits[0]
-        if self.commits_match(first_commit, first_mirror_commit) == False:
-            first_commit_hash = first_commit['commit']
-            os.chdir(f"{self.dir}")
-            subprocess.run(["git", "checkout", first_commit_hash])
-            os.chdir(f"{self.mirror_dir}")
-            # Create orphan branch 'temp', and delete everthing
-            subprocess.run(["git", "switch", "--orphan", "temp"])
-            subprocess.run(["git", "rm", "-rf", "."])
-            subprocess.run(["git", "clean", "-fd"])
-            self.rsync()
-            self.add()
-            message = (
-                f"{first_commit['message']}\n"
-                f"Original Commit Hash: {first_commit['commit']}\n"
-                f"Original Author: {first_commit['author']}\n"
-                f"Original Date: {first_commit['date']}\n"
-                f"Repository {self.url} cloned using CloneLab"
-            )
-            self.commit(message)
-            # Pushes temp branch, copies temp branch to main, then deletes temp branch
-            os.chdir(f"{self.mirror_dir}")
-            subprocess.run(["git", "push", "-u", "origin", "temp"])
-            subprocess.run(["git", "push", "-f", "origin", "temp:main"])
-            subprocess.run(["git", "switch", "main"])
-            subprocess.run(["git", "branch", "--delete", "temp"])
-            subprocess.run(["git", "push", "origin", "--delete", "temp"])
-            os.chdir(f"{self.dir}")
-            subprocess.run(["git", "switch", "-"])
-            # Delete both repos and reclone from remote
-            rmtree(f"{self.dir}")
-            rmtree(f"{self.mirror_dir}")
-            self.set_dirs()
-            subprocess.run(['git', 'clone', self.url, self.dir])
-            subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
-        else:
-            print(f"First commit already mirrored.")
-
+        self.sync_first_commit()
         print(f"Mirroring remaining commits...")
         commits, mirror_commits = self.get_commits()
-        last_correct_commit = first_commit
-        last_correct_mirror_commit = first_mirror_commit
+        last_correct_commit = commits[0]
+        last_correct_mirror_commit = mirror_commits[0]
         i = 0
         for commit in commits:
             try:
@@ -200,22 +159,42 @@ class Repo:
                 f"Repository {self.url} cloned using CloneLab"
             )
             self.commit(message)
-        # Pushes temp branch, copies remaining commits in temp branch to main, then deletes temp branch
-        os.chdir(f"{self.mirror_dir}")
-        subprocess.run(["git", "push", "-u", "origin", "temp"])
-        subprocess.run(["git", "push", "-f", "origin", "temp:main"])
-        subprocess.run(["git", "switch", "main"])
-        subprocess.run(["git", "branch", "--delete", "temp"])
-        subprocess.run(["git", "push", "origin", "--delete", "temp"])
-        # Error switching back to main for original repo
-        os.chdir(f"{self.dir}")
-        subprocess.run(["git", "switch", "-"])
+        self.update()
         print(f"Successfully mirrored {self.url} to {self.mirror_url}")
 
     # It crashed doing bitcoin, so maybe batch them in commits of 100?
     # Even though it didn't work on 1 go, after deleteing the repo files (maybe I did delete them?) and rerunning it sucsessfully cloned a repo with ~200 commits.
     # Need to rewrite commit message to have better formatting for merging pull requsts.
 
+    def sync_first_commit(self):
+        print(f"Mirroring first commit...")
+        commits, mirror_commits = self.get_commits()
+        first_commit = commits[0]
+        first_mirror_commit = mirror_commits[0]
+        if self.commits_match(first_commit, first_mirror_commit) == False:
+            first_commit_hash = first_commit['commit']
+            os.chdir(f"{self.dir}")
+            subprocess.run(["git", "checkout", first_commit_hash])
+            os.chdir(f"{self.mirror_dir}")
+            # Create orphan branch 'temp', and delete everthing
+            subprocess.run(["git", "switch", "--orphan", "temp"])
+            subprocess.run(["git", "rm", "-rf", "."])
+            subprocess.run(["git", "clean", "-fd"])
+            self.rsync()
+            self.add()
+            message = (
+                f"{first_commit['message']}\n"
+                f"Original Commit Hash: {first_commit['commit']}\n"
+                f"Original Author: {first_commit['author']}\n"
+                f"Original Date: {first_commit['date']}\n"
+                f"Repository {self.url} cloned using CloneLab"
+            )
+            self.commit(message)
+            self.update()
+            # Delete both repos and reclone from remote
+            self.get()
+        else:
+            print(f"First commit already mirrored.")
 
     def commits_match(self, current_commit, mirror_commit):
         commit_hash = current_commit["commit"]
@@ -230,6 +209,17 @@ class Repo:
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
         subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
+
+    def update(self):
+            # Pushes temp branch, copies temp branch to main, then deletes temp branch
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "push", "-u", "origin", "temp"])
+            subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+            subprocess.run(["git", "switch", "main"])
+            subprocess.run(["git", "branch", "--delete", "temp"])
+            subprocess.run(["git", "push", "origin", "--delete", "temp"])
+            os.chdir(f"{self.dir}")
+            subprocess.run(["git", "switch", "-"])
 
     def add(self):
         # Runs the 'git commit -a' command to stage all changes on mirror repo
