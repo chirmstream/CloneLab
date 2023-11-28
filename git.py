@@ -12,6 +12,7 @@ class Repo:
         self.url = url
         self.mirror_url = mirror_url
         self.set_dirs()
+        print(f"Starting mirroring for {self.url}")
 
     def set_dirs(self):
         # Setup repo domains, usernames, and project names
@@ -45,7 +46,6 @@ class Repo:
         self.reset_directory()
 
     def get(self):
-        print(f"Starting mirroring for {self.url}")
         # Runs the 'git clone' command for original repo
         if len(os.listdir(self.dir)) == 0:
             subprocess.run(['git', 'clone', self.url, self.dir])
@@ -120,6 +120,7 @@ class Repo:
 
     def sync(self):
         # Syncs first commit only
+        print(f"Mirroring first commit...")
         commits, mirror_commits = self.get_commits()
         first_commit = commits[0]
         first_mirror_commit = mirror_commits[0]
@@ -157,8 +158,10 @@ class Repo:
             self.set_dirs()
             subprocess.run(['git', 'clone', self.url, self.dir])
             subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
+        else:
+            print(f"First commit already mirrored.")
 
-        # Sync remaining commits
+        print(f"Mirroring remaining commits...")
         commits, mirror_commits = self.get_commits()
         last_correct_commit = first_commit
         last_correct_mirror_commit = first_mirror_commit
@@ -207,6 +210,7 @@ class Repo:
         # Error switching back to main for original repo
         os.chdir(f"{self.dir}")
         subprocess.run(["git", "switch", "-"])
+        print(f"Successfully mirrored {self.url} to {self.mirror_url}")
 
     # It crashed doing bitcoin, so maybe batch them in commits of 100?
     # Even though it didn't work on 1 go, after deleteing the repo files (maybe I did delete them?) and rerunning it sucsessfully cloned a repo with ~200 commits.
