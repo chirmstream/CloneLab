@@ -157,6 +157,7 @@ class Repo:
             subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
 
         # Sync remaining commits
+        commits, mirror_commits = self.get_commits()
         last_correct_commit = first_commit
         last_correct_mirror_commit = first_mirror_commit
         i = 0
