@@ -138,6 +138,8 @@ class Repo:
                 last_correct_commit = commits[i - 1]
                 last_correct_mirror_commit = mirror_commits[i - 1]
                 break
+        # Everytime we are called back to this function it returns i for the first merge pull request.  
+        # At i = 30 the mirror commit message does not contain the right commit hash
         return i, last_correct_mirror_commit
 
     def sync(self):
@@ -150,8 +152,11 @@ class Repo:
         subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
         commits_made = 0
         for _ in range(i, len(commits)):
-            if commits_made > 15:
+            if commits_made > 2:
                 self.update()
+                # After pushing new commits we need reset back to how it was before we pushed code
+                # Delete mirror repo and reclone
+                # Checkout mirror repo on temp branch with the last commit we just pushed
                 os.chdir(f"{self.mirror_dir}")
                 rmtree(f"{self.mirror_dir}")
                 self.set_dirs()
