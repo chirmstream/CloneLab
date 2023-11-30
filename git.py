@@ -169,19 +169,28 @@ class Repo:
             self.rsync()
             os.chdir(f"{self.mirror_dir}")
             self.add()
-            message = (
-                f"{commits[_]['message']}\n"
-                f"Original Commit Hash: {commits[_]['commit']}\n"
-                f"Original Author: {commits[_]['author']}\n"
-                f"Original Date: {commits[_]['date']}\n"
-                f"Repository {self.url} cloned using CloneLab"
-            )
+            message = self.create_commit_msg(commits[_])
             self.commit(message)
             commits_made = commits_made + 1
         self.update()
         print(f"Successfully mirrored {self.url} to {self.mirror_url}")
 
-    # Need to rewrite commit message to have better formatting for merging pull requsts.
+    def create_commit_msg(self, commit):
+        # Check if commit was a merge
+        match = re.search(r"^e: a526bf9 ff65c57Merge pull request #4 from cewbdex/patch-1Enhance Fedora dependency part", commit["message"])
+        if match:
+             parents = match.group()
+             # domain = match.group(1)
+             message = "merge + {parents}"
+        else:
+            message = (
+            f"{commit['message']}\n"
+            f"Original Commit Hash: {commit['commit']}\n"
+            f"Original Author: {commit['author']}\n"
+            f"Original Date: {commit['date']}\n"
+            f"Repository {self.url} cloned using CloneLab"
+        )
+        return message
 
     def sync_first_commit(self):
         print(f"Mirroring first commit...")
