@@ -177,11 +177,13 @@ class Repo:
 
     def create_commit_msg(self, commit):
         # Check if commit was a merge
-        match = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from cewbdex/patch-1Enhance Fedora dependency part", commit["message"])
+        match = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from ([a-zA-Z0-9-_]+)/patch-1Enhance Fedora dependency part", commit["message"])
         if match:
              parents = match.group(1)
              parent2 = match.group(2)
              pull_request_num = match.group(3)
+             branch_author = match.group(4)
+             #branch_repo = match.group(5)
              message = "merge + {parents}"
         else:
             message = (
