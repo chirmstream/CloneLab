@@ -152,7 +152,7 @@ class Repo:
         subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
         commits_made = 0
         for _ in range(i, len(commits)):
-            if commits_made > 2:
+            if commits_made > 14:
                 self.update()
                 # After pushing new commits we need reset back to how it was before we pushed code
                 # Delete mirror repo and reclone
@@ -179,13 +179,27 @@ class Repo:
         # Check if commit was a merge
         match = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from ([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+) (.+)$", commit["message"])
         if match:
-             parents = match.group(1)
-             parent2 = match.group(2)
-             pull_request_num = match.group(3)
-             branch_author = match.group(4)
-             branch_repo = match.group(5)
-             merge_msg = match.group(6)
-             message = "merge + {parents}"
+            matches = match.groups()
+            n = len(matches)
+            parents = []
+            for _ in range(0, n - 4):
+                parents.append(matches[_])
+            branch_parents = ""
+            for parent in parents:
+                branch_parents = branch_parents + f" {parent}"
+            pull_request_num = matches[n - 4]
+            branch_author = matches[n - 3]
+            branch_repo = matches[n - 2]
+            merge_msg = matches[n - 1]
+            message = (
+                f"Merge pull request #{pull_request_num} from {branch_author}/{branch_repo}\n"
+                f"{merge_msg}\n"
+                f"Branch Parents:{branch_parents}\n\n"
+                f"Original Commit Hash: {commit['commit']}\n"
+                f"Original Author: {commit['author']}\n"
+                f"Original Date: {commit['date']}\n"
+                f"Repository {self.url} cloned using CloneLab"
+            )
         else:
             message = (
             f"{commit['message']}\n"
