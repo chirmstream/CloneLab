@@ -126,12 +126,6 @@ class Repo:
             if self.commits_match(commit, mirror_commit) == False:
                 return _
         sys.exit("Commits already mirrored")
-    
-    def find_next_incorrect(self):
-        commits, mirror_commits = self.get_commits()
-        i, last_correct_mirror_commit = self.find_last_correct()
-        i = i + 1
-        return i, mirror_commits[i - 1]
 
     def sync(self):
         commits = self.get_commits(self.dir)
