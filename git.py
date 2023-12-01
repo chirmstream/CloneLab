@@ -237,13 +237,7 @@ class Repo:
             subprocess.run(["git", "clean", "-fd"])
             self.rsync()
             self.add()
-            message = (
-                f"{first_commit['message']}\n"
-                f"Original Commit Hash: {first_commit['commit']}\n"
-                f"Original Author: {first_commit['author']}\n"
-                f"Original Date: {first_commit['date']}\n"
-                f"Repository {self.url} cloned using CloneLab"
-            )
+            message = self.create_commit_msg(first_commit)
             self.commit(message)
             self.update()
             # Delete both repos and reclone from remote
