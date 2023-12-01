@@ -164,6 +164,7 @@ class Repo:
                 self.set_dirs()
                 subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
                 i, last_correct_mirror_commit = self.find_last_correct()
+                # Need to return next_incorrect, not last correct commit since _ will increment and they will be out of sync.
                 subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
                 commits_made = 0
             os.chdir(f"{self.dir}")
@@ -255,7 +256,7 @@ class Repo:
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
         #subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
-        subprocess.run(["rsync", "-rh", "--progress", "--exclude", ".git/", src, dest])
+        subprocess.run(["rsync", "-rh", "--exclude", ".git/", src, dest])
 
     def update(self):
             # Pushes temp branch, copies temp branch to main, then deletes temp branch
