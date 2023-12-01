@@ -136,7 +136,8 @@ class Repo:
         n = self.next(commits, mirror_commits)
         # Create temp branch for mirror repo
         os.chdir(f"{self.mirror_dir}")
-        subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n]['commit']])
+        # Checkout last correct commit
+        subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
         commits_made = 0
         # Starts at last correct commit, so first commit will not do anything, fix later to improve speed
         for _ in range(n, len(commits)):
@@ -156,6 +157,7 @@ class Repo:
             os.chdir(f"{self.mirror_dir}")
             self.add()
             message = self.create_commit_msg(commits[_])
+            # For some reason our empty folder 'repos' is not being commited, so later when it gets removed we have a blank commit.
             self.commit(message)
             commits_made = commits_made + 1
         self.update()
