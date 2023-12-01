@@ -148,7 +148,7 @@ class Repo:
         commits, mirror_commits = self.get_commits()
         i, last_correct_mirror_commit = self.find_last_correct()
         i = i + 1
-        return i, mirror_commits[i]
+        return i, mirror_commits[i - 1]
 
     def sync(self):
         self.sync_first_commit()
@@ -264,7 +264,7 @@ class Repo:
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
         #subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
-        subprocess.run(["rsync", "-rh", "--exclude", ".git/", src, dest])
+        subprocess.run(["rsync", "-a", "--exclude", ".git/", src, dest])
 
     def update(self):
             # Pushes temp branch, copies temp branch to main, then deletes temp branch
