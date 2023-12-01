@@ -129,6 +129,7 @@ class Repo:
             except:
                 last_correct_commit = commits[i - 1]
                 last_correct_mirror_commit = mirror_commits[i - 1]
+                i = i -1
                 break
             if self.commits_match(commit, mirror_commit) == True:
                 last_correct_commit = commit
@@ -137,6 +138,7 @@ class Repo:
             else:
                 last_correct_commit = commits[i - 1]
                 last_correct_mirror_commit = mirror_commits[i - 1]
+                i = i -1
                 break
         # Everytime we are called back to this function it returns i for the first merge pull request.  
         # At i = 30 the mirror commit message does not contain the right commit hash
@@ -151,8 +153,8 @@ class Repo:
         os.chdir(f"{self.mirror_dir}") # directory does not exist coming from loop that creates first commit for somereason.  Git clone never went?
         subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
         commits_made = 0
-        for _ in range(i, len(commits)):
-            if commits_made > 14:
+        for _ in range(i + 1, len(commits)):
+            if commits_made > 2:
                 self.update()
                 # After pushing new commits we need reset back to how it was before we pushed code
                 # Delete mirror repo and reclone
@@ -252,7 +254,8 @@ class Repo:
         subprocess.run(["git", "rm", "-rf", "."])
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
-        subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
+        #subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
+        subprocess.run(["rsync", "-rh", "--progress", "--exclude", ".git/", src, dest])
 
     def update(self):
             # Pushes temp branch, copies temp branch to main, then deletes temp branch
