@@ -143,6 +143,12 @@ class Repo:
         # Everytime we are called back to this function it returns i for the first merge pull request.  
         # At i = 30 the mirror commit message does not contain the right commit hash
         return i, last_correct_mirror_commit
+    
+    def find_next_incorrect(self):
+        commits, mirror_commits = self.get_commits()
+        i, last_correct_mirror_commit = self.find_last_correct()
+        i = i + 1
+        return i, mirror_commits[i]
 
     def sync(self):
         self.sync_first_commit()
@@ -153,7 +159,8 @@ class Repo:
         os.chdir(f"{self.mirror_dir}") # directory does not exist coming from loop that creates first commit for somereason.  Git clone never went?
         subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
         commits_made = 0
-        for _ in range(i + 1, len(commits)):
+        # Starts at last correct commit, so first commit will not do anything, fix later to improve speed
+        for _ in range(i, len(commits)):
             if commits_made > 2:
                 self.update()
                 # After pushing new commits we need reset back to how it was before we pushed code
@@ -163,9 +170,10 @@ class Repo:
                 rmtree(f"{self.mirror_dir}")
                 self.set_dirs()
                 subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
-                i, last_correct_mirror_commit = self.find_last_correct()
+                i, next_incorrect_mirror_commit = self.find_next_incorrect()
                 # Need to return next_incorrect, not last correct commit since _ will increment and they will be out of sync.
-                subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
+                commits, mirror_commits = self.get_commits()
+                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_]['commit']])
                 commits_made = 0
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "checkout", commits[_]['commit']])
