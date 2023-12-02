@@ -149,7 +149,9 @@ class Repo:
                 self.set_dirs()
                 subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
                 mirror_commits = self.get_commits(self.mirror_dir)
-                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']])
+                ################
+                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']]) ########### Got index error
+                ############
                 commits_made = 0
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "checkout", commits[_]['commit']])
@@ -251,7 +253,24 @@ class Repo:
         subprocess.run(["git", "add", "."], cwd=self.mirror_dir)
         self.reset_directory()
 
+    def get_empty_directories(self, path):
+        # Credit for this function goes to tutorialspoint.com, it was a very simple function though so I felt okay copying it.
+        # https://www.tutorialspoint.com/get-the-list-of-all-empty-directories-in-python#:~:text=By%20checking%20if%20both%20the,directory%20and%20not%20a%20file.
+        empty_dirs = []
+        for entry in os.scandir(path):
+            if entry.is_dir() and not any(entry.is_file() for entry in os.scandir(entry.path)):
+                empty_dirs.append(entry.path)
+        return empty_dirs
+
     def commit(self, message):
+        # Check for empty folders
+        empty_directories = self.get_empty_directories(self.mirror_dir)
+        if empty_directories:
+            for empty_directory in empty_directories:
+                os.chdir(f"{empty_directory}")
+                with open(".gitkeep", "w") as file:
+                    file.write("")
+            print(empty_directories)
         # Runs the 'git commit -S -m' command to make a signed commit with message
         subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir)
 
