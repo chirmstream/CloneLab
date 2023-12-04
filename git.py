@@ -142,7 +142,17 @@ class Repo:
         # No file changes made, only git backend
         for _ in range(n, len(commits)):
             if commits_made > 3:
-                self.update()
+                #self.update() # For some reason did not push code changes
+
+                os.chdir(f"{self.mirror_dir}")
+                subprocess.run(["git", "push", "-u", "origin", "temp"])
+                subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+                subprocess.run(["git", "switch", "main"])
+                subprocess.run(["git", "branch", "--delete", "temp"])
+                subprocess.run(["git", "push", "origin", "--delete", "temp"])
+                os.chdir(f"{self.dir}")
+                subprocess.run(["git", "switch", "-"])
+
                 # After pushing new commits we need reset back to how it was before we pushed code
                 os.chdir(f"{self.mirror_dir}")
                 rmtree(f"{self.mirror_dir}")
@@ -270,14 +280,7 @@ class Repo:
                 with open(".gitkeep", "w") as file:
                     file.write("")
             print(empty_directories)
-        # Runs the 'git commit -S -m' command to make a signed commit with message
-        output = subprocess.check_output(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir)
-        # It looks like one of my merges of branches resulted in to changes to the project files, but there was a commit made
-        # So when we go to clone this commit, it ends up getting skipped because nothing changed, so I propose
-        # We make some kind of temporary file/folder of some sort or some other way to ensure the commit is made if the response to making our commit
-        # is "nothing to commit, working tree clean" or similar of the sort.
-        if output == "nothing to commit, working tree clean":
-            print("found empty commit")
+        subprocess.run(["git", "commit", "-S", "-m" "--allow-empty", message], cwd=self.mirror_dir)
 
     def push(self, remote_name="", branch_name=""):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
