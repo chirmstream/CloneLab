@@ -142,16 +142,7 @@ class Repo:
         # No file changes made, only git backend
         for _ in range(n, len(commits)):
             if commits_made > 3:
-                #self.update() # For some reason did not push code changes
-
-                os.chdir(f"{self.mirror_dir}")
-                subprocess.run(["git", "push", "-u", "origin", "temp"])
-                subprocess.run(["git", "push", "-f", "origin", "temp:main"])
-                subprocess.run(["git", "switch", "main"])
-                subprocess.run(["git", "branch", "--delete", "temp"])
-                subprocess.run(["git", "push", "origin", "--delete", "temp"])
-                os.chdir(f"{self.dir}")
-                subprocess.run(["git", "switch", "-"])
+                self.update() # For some reason did not push code changes
 
                 # After pushing new commits we need reset back to how it was before we pushed code
                 os.chdir(f"{self.mirror_dir}")
@@ -280,7 +271,9 @@ class Repo:
                 with open(".gitkeep", "w") as file:
                     file.write("")
             print(empty_directories)
-        subprocess.run(["git", "commit", "-S", "-m" "--allow-empty", message], cwd=self.mirror_dir)
+        subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir) #adding --allow-empty flag made it stop working for normal commits
+        # A different option would be to try,
+        # git commit --allow-empty or something like that
 
     def push(self, remote_name="", branch_name=""):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
