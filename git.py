@@ -132,16 +132,16 @@ class Repo:
         mirror_commits = self.get_commits(self.mirror_dir)
         self.sync_first_commit(commits[0], mirror_commits[0])
         print(f"Mirroring remaining commits...")
-
         n = self.next(commits, mirror_commits)
         # Create temp branch for mirror repo
         os.chdir(f"{self.mirror_dir}")
         # Checkout last correct commit
         subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
         commits_made = 0
-        # Starts at last correct commit, so first commit will not do anything, fix later to improve speed
+        # Merge branch 'main' of https://github.com/chirmstream/CloneLab causes issues,
+        # No file changes made, only git backend
         for _ in range(n, len(commits)):
-            if commits_made > 2:
+            if commits_made > 3:
                 self.update()
                 # After pushing new commits we need reset back to how it was before we pushed code
                 os.chdir(f"{self.mirror_dir}")
@@ -249,8 +249,7 @@ class Repo:
             subprocess.run(["git", "switch", "-"])
 
     def add(self):
-        # Runs the 'git commit -a' command to stage all changes on mirror repo
-        subprocess.run(["git", "add", "."], cwd=self.mirror_dir)
+        output = subprocess.run(["git", "add", "."], cwd=self.mirror_dir)
         self.reset_directory()
 
     def get_empty_directories(self, path):
