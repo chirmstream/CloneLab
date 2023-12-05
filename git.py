@@ -268,8 +268,8 @@ class Repo:
                     file.write("")
             print(empty_directories)
         subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir) #adding --allow-empty flag made it stop working for normal commits
-        # A different option would be to try,
-        # git commit --allow-empty or something like that
+        # confirmed git commit --allow-empty -s -m "message" worked to create an empty commit
+        # what about the same commit with actual changes?  HMMM?...
 
     def push(self, remote_name="", branch_name=""):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
