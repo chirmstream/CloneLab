@@ -67,15 +67,12 @@ class Repo:
             subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
         self.reset_directory()
 
-    def get_commits(self):
+    def get_commits(self, repository_folder):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
-        os.chdir(f"{self.dir}")
+        os.chdir(f"{repository_folder}")
         log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
         commits = self.process_log(log_raw)
-        os.chdir(f"{self.mirror_dir}")
-        mirror_log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
-        mirror_commits = self.process_log(mirror_log_raw)
-        return commits, mirror_commits
+        return commits
 
     def process_log(self, log):
         commits = []
@@ -118,53 +115,39 @@ class Repo:
         s = s + "\n"
         return s
 
-    def find_last_correct(self):
-        commits, mirror_commits = self.get_commits()
-        last_correct_commit = commits[0]
-        last_correct_mirror_commit = mirror_commits[0]
-        i = 0
-        for commit in commits:
+    def next(self, commits, mirror_commits):
+        # Can assume last correct commit is commit # 1 zero indexed
+        for _ in range(1, len(commits)):
             try:
-                mirror_commit = mirror_commits[i]
+                commit = commits[_]
+                mirror_commit = mirror_commits[_]
             except:
-                last_correct_commit = commits[i - 1]
-                last_correct_mirror_commit = mirror_commits[i - 1]
-                i = i -1
-                break
-            if self.commits_match(commit, mirror_commit) == True:
-                last_correct_commit = commit
-                last_correct_mirror_commit = mirror_commits[i]
-                i = i + 1
-            else:
-                last_correct_commit = commits[i - 1]
-                last_correct_mirror_commit = mirror_commits[i - 1]
-                i = i -1
-                break
-        # Everytime we are called back to this function it returns i for the first merge pull request.  
-        # At i = 30 the mirror commit message does not contain the right commit hash
-        return i, last_correct_mirror_commit
+                return _
+            if self.commits_match(commit, mirror_commit) == False:
+                return _
+        sys.exit("Commits already mirrored")
 
     def sync(self):
-        self.sync_first_commit()
+        commits = self.get_commits(self.dir)
+        mirror_commits = self.get_commits(self.mirror_dir)
+        self.sync_first_commit(commits[0], mirror_commits[0])
         print(f"Mirroring remaining commits...")
-        commits, mirror_commits = self.get_commits()
-        i, last_correct_mirror_commit = self.find_last_correct()
+        n = self.next(commits, mirror_commits)
         # Create temp branch for mirror repo
-        os.chdir(f"{self.mirror_dir}") # directory does not exist coming from loop that creates first commit for somereason.  Git clone never went?
-        subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
+        os.chdir(f"{self.mirror_dir}")
+        # Checkout last correct commit
+        subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
         commits_made = 0
-        for _ in range(i + 1, len(commits)):
-            if commits_made > 2:
+        for _ in range(n, len(commits)):
+            if commits_made > 15:
                 self.update()
                 # After pushing new commits we need reset back to how it was before we pushed code
-                # Delete mirror repo and reclone
-                # Checkout mirror repo on temp branch with the last commit we just pushed
                 os.chdir(f"{self.mirror_dir}")
                 rmtree(f"{self.mirror_dir}")
                 self.set_dirs()
                 subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
-                i, last_correct_mirror_commit = self.find_last_correct()
-                subprocess.run(["git", "checkout", "-b", "temp", last_correct_mirror_commit['commit']])
+                mirror_commits = self.get_commits(self.mirror_dir)
+                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']])
                 commits_made = 0
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "checkout", commits[_]['commit']])
@@ -179,6 +162,7 @@ class Repo:
 
     def create_commit_msg(self, commit):
         # Check if commit was a merge
+        # Did not correctly detect commit 2d0a224bdbdcc759c968f000ebf68363de380ff1 merge message "Merge branch 'main' of https://github.com/chirmstream/CloneLab" n=24 or something like that
         match = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from ([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+) (.+)$", commit["message"])
         if match:
             matches = match.groups()
@@ -212,12 +196,10 @@ class Repo:
         )
         return message
 
-    def sync_first_commit(self):
-        print(f"Mirroring first commit...")
-        commits, mirror_commits = self.get_commits()
-        first_commit = commits[0]
-        first_mirror_commit = mirror_commits[0]
+    def sync_first_commit(self, first_commit, first_mirror_commit):
+        print(f"Checking first commit...")
         if self.commits_match(first_commit, first_mirror_commit) == False:
+            print(f"Syncing first commit...")
             first_commit_hash = first_commit['commit']
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "checkout", first_commit_hash])
@@ -228,19 +210,13 @@ class Repo:
             subprocess.run(["git", "clean", "-fd"])
             self.rsync()
             self.add()
-            message = (
-                f"{first_commit['message']}\n"
-                f"Original Commit Hash: {first_commit['commit']}\n"
-                f"Original Author: {first_commit['author']}\n"
-                f"Original Date: {first_commit['date']}\n"
-                f"Repository {self.url} cloned using CloneLab"
-            )
+            message = self.create_commit_msg(first_commit)
             self.commit(message)
             self.update()
             # Delete both repos and reclone from remote
             self.get()
         else:
-            print(f"First commit already mirrored.")
+            print(f"First commit already already mirrored...")
 
     def commits_match(self, current_commit, mirror_commit):
         commit_hash = current_commit["commit"]
@@ -255,7 +231,7 @@ class Repo:
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
         #subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
-        subprocess.run(["rsync", "-rh", "--progress", "--exclude", ".git/", src, dest])
+        subprocess.run(["rsync", "-a", "--exclude", ".git/", src, dest])
 
     def update(self):
             # Pushes temp branch, copies temp branch to main, then deletes temp branch
@@ -269,13 +245,28 @@ class Repo:
             subprocess.run(["git", "switch", "-"])
 
     def add(self):
-        # Runs the 'git commit -a' command to stage all changes on mirror repo
         subprocess.run(["git", "add", "."], cwd=self.mirror_dir)
         self.reset_directory()
 
+    def get_empty_directories(self, path):
+        # Credit for this function goes to tutorialspoint.com, it was a very simple function though so I felt okay copying it.
+        # https://www.tutorialspoint.com/get-the-list-of-all-empty-directories-in-python#:~:text=By%20checking%20if%20both%20the,directory%20and%20not%20a%20file.
+        empty_dirs = []
+        for entry in os.scandir(path):
+            if entry.is_dir() and not any(entry.is_file() for entry in os.scandir(entry.path)):
+                empty_dirs.append(entry.path)
+        return empty_dirs
+
     def commit(self, message):
-        # Runs the 'git commit -S -m' command to make a signed commit with message
-        subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir)
+        # Check for empty folders
+        empty_directories = self.get_empty_directories(self.mirror_dir)
+        if empty_directories:
+            for empty_directory in empty_directories:
+                os.chdir(f"{empty_directory}")
+                with open(".gitkeep", "w") as file:
+                    file.write("")
+            print(empty_directories)
+        subprocess.run(["git", "commit", "--allow-empty", "-S", "-m", message], cwd=self.mirror_dir)
 
     def push(self, remote_name="", branch_name=""):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
