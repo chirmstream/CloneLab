@@ -141,18 +141,15 @@ class Repo:
         # Merge branch 'main' of https://github.com/chirmstream/CloneLab causes issues,
         # No file changes made, only git backend
         for _ in range(n, len(commits)):
-            if commits_made > 3:
-                self.update() # For some reason did not push code changes
-
+            if commits_made > 0:
+                self.update()
                 # After pushing new commits we need reset back to how it was before we pushed code
                 os.chdir(f"{self.mirror_dir}")
                 rmtree(f"{self.mirror_dir}")
                 self.set_dirs()
                 subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
                 mirror_commits = self.get_commits(self.mirror_dir)
-                ################
                 subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']]) ########### Got index error
-                ############
                 commits_made = 0
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "checkout", commits[_]['commit']])
@@ -160,7 +157,6 @@ class Repo:
             os.chdir(f"{self.mirror_dir}")
             self.add()
             message = self.create_commit_msg(commits[_])
-            # For some reason our empty folder 'repos' is not being commited, so later when it gets removed we have a blank commit.
             self.commit(message)
             commits_made = commits_made + 1
         self.update()
