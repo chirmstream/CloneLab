@@ -138,8 +138,6 @@ class Repo:
         # Checkout last correct commit
         subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
         commits_made = 0
-        # Merge branch 'main' of https://github.com/chirmstream/CloneLab causes issues,
-        # No file changes made, only git backend
         for _ in range(n, len(commits)):
             if commits_made > 0:
                 self.update()
@@ -149,7 +147,7 @@ class Repo:
                 self.set_dirs()
                 subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
                 mirror_commits = self.get_commits(self.mirror_dir)
-                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']]) ########### Got index error
+                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']])
                 commits_made = 0
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "checkout", commits[_]['commit']])
@@ -267,9 +265,7 @@ class Repo:
                 with open(".gitkeep", "w") as file:
                     file.write("")
             print(empty_directories)
-        subprocess.run(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir) #adding --allow-empty flag made it stop working for normal commits
-        # confirmed git commit --allow-empty -s -m "message" worked to create an empty commit
-        # what about the same commit with actual changes?  HMMM?...
+        subprocess.run(["git", "commit", "--allow-empty", "-S", "-m", message], cwd=self.mirror_dir)
 
     def push(self, remote_name="", branch_name=""):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
