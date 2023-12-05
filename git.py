@@ -138,10 +138,8 @@ class Repo:
         # Checkout last correct commit
         subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
         commits_made = 0
-        # Merge branch 'main' of https://github.com/chirmstream/CloneLab causes issues,
-        # No file changes made, only git backend
         for _ in range(n, len(commits)):
-            if commits_made > 3:
+            if commits_made > 0:
                 self.update()
                 # After pushing new commits we need reset back to how it was before we pushed code
                 os.chdir(f"{self.mirror_dir}")
@@ -149,9 +147,7 @@ class Repo:
                 self.set_dirs()
                 subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
                 mirror_commits = self.get_commits(self.mirror_dir)
-                ################
-                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']]) ########### Got index error
-                ############
+                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']])
                 commits_made = 0
             os.chdir(f"{self.dir}")
             subprocess.run(["git", "checkout", commits[_]['commit']])
@@ -159,7 +155,6 @@ class Repo:
             os.chdir(f"{self.mirror_dir}")
             self.add()
             message = self.create_commit_msg(commits[_])
-            # For some reason our empty folder 'repos' is not being commited, so later when it gets removed we have a blank commit.
             self.commit(message)
             commits_made = commits_made + 1
         self.update()
@@ -270,14 +265,7 @@ class Repo:
                 with open(".gitkeep", "w") as file:
                     file.write("")
             print(empty_directories)
-        # Runs the 'git commit -S -m' command to make a signed commit with message
-        output = subprocess.check_output(["git", "commit", "-S", "-m", message], cwd=self.mirror_dir)
-        # It looks like one of my merges of branches resulted in to changes to the project files, but there was a commit made
-        # So when we go to clone this commit, it ends up getting skipped because nothing changed, so I propose
-        # We make some kind of temporary file/folder of some sort or some other way to ensure the commit is made if the response to making our commit
-        # is "nothing to commit, working tree clean" or similar of the sort.
-        if output == "nothing to commit, working tree clean":
-            print("found empty commit")
+        subprocess.run(["git", "commit", "--allow-empty", "-S", "-m", message], cwd=self.mirror_dir)
 
     def push(self, remote_name="", branch_name=""):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
