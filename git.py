@@ -50,6 +50,7 @@ class Repo:
         if len(os.listdir(self.dir)) == 0:
             subprocess.run(['git', 'clone', self.url, self.dir])
         else:
+            os.chdir(f"{self.dir}")
             rmtree(f"{self.dir}")
             self.set_dirs()
             subprocess.run(['git', 'clone', self.url, self.dir])
@@ -62,6 +63,7 @@ class Repo:
                 url = f"https://{self.mirror_username}:{password}@{self.mirror_domain}/{self.mirror_username}/{self.mirror_name}.git"
                 subprocess.run(['git', 'clone', url, self.mirror_dir])
         else:
+            os.chdir(f"{self.mirror_dir}")
             rmtree(f"{self.mirror_dir}")
             self.set_dirs()
             subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
@@ -163,9 +165,9 @@ class Repo:
     def create_commit_msg(self, commit):
         # Check if commit was a merge
         # Did not correctly detect commit 2d0a224bdbdcc759c968f000ebf68363de380ff1 merge message "Merge branch 'main' of https://github.com/chirmstream/CloneLab" n=24 or something like that
-        match = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from ([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+) (.+)$", commit["message"])
-        if match:
-            matches = match.groups()
+        pull_requst = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from ([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+) (.+)$", commit["message"])
+        if pull_requst:
+            matches = pull_requst.groups()
             n = len(matches)
             parents = []
             for _ in range(0, n - 4):
@@ -186,13 +188,45 @@ class Repo:
                 f"Original Date: {commit['date']}\n"
                 f"Repository {self.url} cloned using CloneLab"
             )
+        branch_merge = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge branch ([a-zA-Z0-9/']+) of ([a-z]+://[a-zA-Z/\.]+)(.)*$", commit["message"])
+        if branch_merge:
+            matches = branch_merge.groups()
+            n = len(matches)
+            parents = []
+            for _ in range(0, n - 3):
+                parents.append(matches[_])
+            branch_parents = ""
+            for parent in parents:
+                branch_parents = branch_parents + f" {parent}"
+            branch_name = matches[n - 3]
+            branch_repo = matches[n - 2]
+            if matches[n - 1] == None:
+                message = (
+                    f"Merge branch {branch_name} of {branch_repo}\n"
+                    f"Branch Parents:{branch_parents}\n\n"
+                    f"Original Commit Hash: {commit['commit']}\n"
+                    f"Original Author: {commit['author']}\n"
+                    f"Original Date: {commit['date']}\n"
+                    f"Repository {self.url} cloned using CloneLab"
+                )
+            else:
+                merge_msg = matches[n - 1]
+                message = (
+                    f"Merge branch {branch_name} of {branch_repo}\n"
+                    f"{merge_msg}\n"
+                    f"Branch Parents:{branch_parents}\n\n"
+                    f"Original Commit Hash: {commit['commit']}\n"
+                    f"Original Author: {commit['author']}\n"
+                    f"Original Date: {commit['date']}\n"
+                    f"Repository {self.url} cloned using CloneLab"
+                )
         else:
             message = (
-            f"{commit['message']}\n"
-            f"Original Commit Hash: {commit['commit']}\n"
-            f"Original Author: {commit['author']}\n"
-            f"Original Date: {commit['date']}\n"
-            f"Repository {self.url} cloned using CloneLab"
+                f"{commit['message']}\n"
+                f"Original Commit Hash: {commit['commit']}\n"
+                f"Original Author: {commit['author']}\n"
+                f"Original Date: {commit['date']}\n"
+                f"Repository {self.url} cloned using CloneLab"
         )
         return message
 
