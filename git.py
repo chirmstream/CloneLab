@@ -12,6 +12,8 @@ class Repo:
         self.url = url
         self.mirror_url = mirror_url
         self.set_dirs()
+        self.get(self.url, self.dir)
+        self.get(self.mirror_url, self.mirror_dir)
         print(f"Starting mirroring for {self.url}")
 
     def set_dirs(self):
@@ -45,29 +47,29 @@ class Repo:
         self.mirror_dir = os.getcwd()
         self.reset_directory()
 
-    def get(self):
-        # Runs the 'git clone' command for original repo
-        if len(os.listdir(self.dir)) == 0:
-            subprocess.run(['git', 'clone', self.url, self.dir])
-        else:
-            os.chdir(f"{self.dir}")
-            rmtree(f"{self.dir}")
-            self.set_dirs()
-            subprocess.run(['git', 'clone', self.url, self.dir])
-        # Runs the 'git clone' command for mirror repo
-        if len(os.listdir(self.mirror_dir)) == 0:
-            try: 
-                subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
+    def get(self, git_url, local_path):
+        if len(os.listdir(local_path)) == 0:
+            try:
+                subprocess.run(['git', 'clone', git_url, local_path])
             except:
-                print("repository appears to be private, trying login")
-                url = f"https://{self.mirror_username}:{password}@{self.mirror_domain}/{self.mirror_username}/{self.mirror_name}.git"
-                subprocess.run(['git', 'clone', url, self.mirror_dir])
+                self.get_private(git_url, local_path, self.mirror_username, self.mirror_password)
         else:
-            os.chdir(f"{self.mirror_dir}")
-            rmtree(f"{self.mirror_dir}")
+            rmtree(f"{local_path}")
             self.set_dirs()
-            subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
+            try:
+                subprocess.run(['git', 'clone', git_url, local_path])
+            except:
+                self.get_private(git_url, local_path, self.mirror_username, self.mirror_password)
         self.reset_directory()
+
+    def get_private(self, git_url, local_path, username, password):
+        git_url = f"https://{username}:{password}@{self.mirror_domain}/{username}/{self.mirror_name}.git"
+        if len(os.listdir(local_path)) == 0:
+            subprocess.run(['git', 'clone', git_url, local_path])
+        else:
+            rmtree(f"{local_path}")
+            self.set_dirs()
+            subprocess.run(['git', 'clone', git_url, local_path])
 
     def get_commits(self, repository_folder):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
@@ -136,9 +138,12 @@ class Repo:
         print(f"Mirroring remaining commits...")
         n = self.next(commits, mirror_commits)
         # Create temp branch for mirror repo
-        os.chdir(f"{self.mirror_dir}")
-        # Checkout last correct commit
-        subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
+        if n == 1:
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "checkout", "-b", "temp"])
+        else:
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
         commits_made = 0
         for _ in range(n, len(commits)):
             if commits_made > 150:
@@ -147,7 +152,7 @@ class Repo:
                 os.chdir(f"{self.mirror_dir}")
                 rmtree(f"{self.mirror_dir}")
                 self.set_dirs()
-                subprocess.run(['git', 'clone', self.mirror_url, self.mirror_dir])
+                self.get(self.mirror_url, self.mirror_dir)
                 mirror_commits = self.get_commits(self.mirror_dir)
                 subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']])
                 commits_made = 0
@@ -246,9 +251,16 @@ class Repo:
             self.add()
             message = self.create_commit_msg(first_commit)
             self.commit(message)
-            self.update()
+            # Push code to remote branch 'temp' and delete 'temp' afterwards
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "push", "-u", "origin", "temp"])
+            subprocess.run(["git", "push", "-f", "origin", "temp:main"])
+            subprocess.run(["git", "switch", "main"])
+            subprocess.run(["git", "branch", "--delete", "temp"])
+            subprocess.run(["git", "push", "origin", "--delete", "temp"])
             # Delete both repos and reclone from remote
-            self.get()
+            self.get(self.url, self.dir)
+            self.get(self.mirror_url, self.mirror_dir)
         else:
             print(f"First commit already already mirrored...")
 

@@ -10,7 +10,6 @@ with open("config.csv", "r") as csvfile:
     os.chdir("..")
     for row in reader:
         repo = git.Repo(row["original_repository"], row["mirror_repository"])
-        repo.get() # Need to setup to delete everything and reclone if it exists
         repo.set_mirror_login(row["mirror_password"])
         repo.sync()
 
