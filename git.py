@@ -141,7 +141,7 @@ class Repo:
         subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
         commits_made = 0
         for _ in range(n, len(commits)):
-            if commits_made > 30:
+            if commits_made > 150:
                 self.update()
                 # After pushing new commits we need reset back to how it was before we pushed code
                 os.chdir(f"{self.mirror_dir}")
@@ -163,7 +163,7 @@ class Repo:
         print(f"Successfully mirrored {self.url} to {self.mirror_url}")
 
     def create_commit_msg(self, commit):
-        pull_requst = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from ([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+) (.+)$", commit["message"])
+        pull_requst = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from ([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)(.*)$", commit["message"])
         if pull_requst:
             matches = pull_requst.groups()
             n = len(matches)
