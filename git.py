@@ -6,46 +6,18 @@ from shutil import rmtree
 
 
 class Repo:
-    def __init__(self, url, mirror_url):
-        # Assign repo.url, repo.username (project owner), repo.name (project name), and repo.local_dir (where repo is stored locally)
-        # Url should include ".git" at the end
+    def __init__(self, url, type):
         self.url = url
-        self.mirror_url = mirror_url
-        self.set_dirs()
-        self.get(self.url, self.dir)
-        self.get(self.mirror_url, self.mirror_dir)
-        print(f"Starting mirroring for {self.url}")
+        self.type = type
+        self.username, self.repo_name = self.parse_url
+        self.dir = self.get_dir(self.url, self.type, self.username, self.repo_name)
 
-    def set_dirs(self):
-        # Setup repo domains, usernames, and project names
-        self.domain, self.username, self.name = self.parse_url(self.url)
-        self.mirror_domain, self.mirror_username, self.mirror_name = self.parse_url(self.mirror_url)
-        # Setup repo folder structure
-        self.reset_directory()
-        # Set repo local path
-        if not os.path.isdir("repos"):
-            os.makedirs("repos")
-        os.chdir("repos")
-        if not os.path.isdir(self.username):
-            os.makedirs(self.username)
-        os.chdir(self.username)
-        if not os.path.isdir(self.name):
-            os.makedirs(self.name)
-        os.chdir(self.name)
-        self.dir = os.getcwd()
-        self.reset_directory()
-        # setup mirrored repo folder structure
-        if not os.path.isdir("mirror_repos"):
-            os.makedirs("mirror_repos", exist_ok=True)
-        os.chdir("mirror_repos")
-        if not os.path.isdir(self.mirror_username):
-            os.makedirs(self.mirror_username)
-        os.chdir(f"{self.mirror_username}")
-        if not os.path.isdir(self.mirror_name):
-            os.makedirs(self.mirror_name)
-        os.chdir(self.mirror_name)
-        self.mirror_dir = os.getcwd()
-        self.reset_directory()
+    def get_dir(self, url, type, username, repo_name):
+        if type == "original":
+            path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "repos", username, repo_name)
+        elif type == "mirror":
+            path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "mirror_repos", username, repo_name)
+        return path
 
     def get(self, git_url, local_path):
         if len(os.listdir(local_path)) == 0:
@@ -317,24 +289,6 @@ class Repo:
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
         subprocess.run(["git", "push"], cwd=self.mirror_dir)
 
-    def set_mirror_login(self, password):
-        # Rewrites mirror_repo .git/config url to to include username & password for https pushes.
-        os.chdir("mirror_repos")
-        os.chdir(self.mirror_username)
-        os.chdir(self.mirror_name)
-        if not os.path.isdir(".git"):
-            sys.exit("missing mirror git config file, please initialize repository with a readme")
-        os.chdir(".git")
-        try:
-            with open("config", "r") as file:
-                old_config = file.read()
-        except FileNotFoundError:
-            sys.exit("error, mirror_repo not found")
-        with open("config", "w") as file:
-            new_config = re.sub(r"https://(?:www\.)?(.+)/(.+)/(.+)\.git", f"https://{self.mirror_username}:{password}@{self.mirror_domain}/{self.mirror_username}/{self.mirror_name}.git", old_config)
-            file.write(new_config)
-        self.reset_directory()
-
     def parse_url(self, url):
         try:
             match = re.search(r"https://(?:www\.)?(.+)/(.+)/(.+)\.git", url)
@@ -353,6 +307,20 @@ class Repo:
         if not os.path.isdir("CloneLab-data"):
             os.makedirs("CloneLab-data")
         os.chdir("CloneLab-data")
+
+    # Getter for type
+    @property
+    def type(self):
+        return self._type
+
+    # Setter for type
+    @type.setter
+    def url(self, type):
+        allowed_types = ['original', 'mirror']
+        if type.lower() in allowed_types:
+            self._type = type.lower()
+        else:
+            sys.exit(f"Repository type {type} not allowed")
 
     # Getter for url
     @property

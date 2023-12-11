@@ -9,8 +9,8 @@ with open("config.csv", "r") as csvfile:
     fieldnames = reader.fieldnames
     os.chdir("..")
     for row in reader:
-        repo = git.Repo(row["original_repository"], row["mirror_repository"])
-        repo.set_mirror_login(row["mirror_password"])
+        repo = git.Repo(row["original_repository"], original)
+        mirror_repo = git.Repo(row["mirror_repository"], mirror)
         repo.sync()
 
 print("CLoneLab finished!  All repositories have been mirrored.")
