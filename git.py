@@ -9,6 +9,10 @@ class Repo:
     def __init__(self, url, type):
         self.url = url
         self.type = type
+        if self.url[:4] == "git@":
+            self.auth_method == "ssh"
+        else:
+            self.auth_method == "https"
         self.username, self.repo_name = self.parse_url
         self.dir = self.get_dir(self.url, self.type, self.username, self.repo_name)
 
@@ -290,6 +294,11 @@ class Repo:
         subprocess.run(["git", "push"], cwd=self.mirror_dir)
 
     def parse_url(self, url):
+
+
+
+
+
         try:
             match = re.search(r"https://(?:www\.)?(.+)/(.+)/(.+)\.git", url)
             if match:
@@ -307,6 +316,20 @@ class Repo:
         if not os.path.isdir("CloneLab-data"):
             os.makedirs("CloneLab-data")
         os.chdir("CloneLab-data")
+
+    # Getter for auth_method
+    @property
+    def auth_method(self):
+        return self._auth_method
+
+    # Setter for auth_method
+    @auth_method.setter
+    def url(self, auth_method):
+        allowed_methods = ['ssh', 'https']
+        if auth_method.lower() in allowed_types:
+            self._auth_method = auth_method.lower()
+        else:
+            sys.exit(f"{auth_method} is not an allowed authorization method")
 
     # Getter for type
     @property
