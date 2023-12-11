@@ -13,14 +13,14 @@ class Repo:
             self.auth_method == "ssh"
         else:
             self.auth_method == "https"
-        self.username, self.repo_name = self.parse_url
+        self.username, self.password, self.domain, self.repo_owner, self.repo_name = self.parse_url
         self.dir = self.get_dir(self.url, self.type, self.username, self.repo_name)
 
-    def get_dir(self, url, type, username, repo_name):
+    def get_dir(self, url, type, repo_owner, repo_name):
         if type == "original":
-            path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "repos", username, repo_name)
+            path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "repos", repo_owner, repo_name)
         elif type == "mirror":
-            path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "mirror_repos", username, repo_name)
+            path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "mirror_repos", repo_owner, repo_name)
         return path
 
     def get(self, git_url, local_path):
@@ -294,22 +294,17 @@ class Repo:
         subprocess.run(["git", "push"], cwd=self.mirror_dir)
 
     def parse_url(self, url):
-
-
-
-
-
         try:
-            match = re.search(r"https://(?:www\.)?(.+)/(.+)/(.+)\.git", url)
+            match = re.search(r"^https://(.+):(.+)@(.+)/(.+)/(.+).git$", url)
             if match:
-                domain = match.group(1)
-                if domain:
-                    username = match.group(2)
-                    if username:
-                        name = match.group(3)
+                username = match.group(1)
+                password = match.group(2)
+                domain = match.group(3)
+                repo_owner = match.group(4)
+                repo_name = match.group(5)
         except:
             sys.exit(f"Error, invalid url: {url}")
-        return (domain, username, name)
+        return username, password, domain, repo_owner, repo_name
 
     def reset_directory(self):
         os.chdir(os.path.expanduser("~"))
