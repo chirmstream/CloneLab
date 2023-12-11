@@ -23,29 +23,12 @@ class Repo:
             path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "mirror_repos", repo_owner, repo_name)
         return path
 
-    def get(self, git_url, local_path):
-        if len(os.listdir(local_path)) == 0:
-            try:
-                subprocess.run(['git', 'clone', git_url, local_path])
-            except:
-                self.get_private(git_url, local_path, self.mirror_username, self.mirror_password)
+    def get(self):
+        if len(os.listdir(self.path)) == 0:
+                subprocess.run(['git', 'clone', self.url, self.path])
         else:
-            rmtree(f"{local_path}")
-            self.set_dirs()
-            try:
-                subprocess.run(['git', 'clone', git_url, local_path])
-            except:
-                self.get_private(git_url, local_path, self.mirror_username, self.mirror_password)
-        self.reset_directory()
-
-    def get_private(self, git_url, local_path, username, password):
-        git_url = f"https://{username}:{password}@{self.mirror_domain}/{username}/{self.mirror_name}.git"
-        if len(os.listdir(local_path)) == 0:
-            subprocess.run(['git', 'clone', git_url, local_path])
-        else:
-            rmtree(f"{local_path}")
-            self.set_dirs()
-            subprocess.run(['git', 'clone', git_url, local_path])
+            rmtree(f"{self.path}")
+            subprocess.run(['git', 'clone', self.url, self.path])
 
     def get_commits(self, repository_folder):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
