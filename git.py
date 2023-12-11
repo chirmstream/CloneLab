@@ -276,7 +276,6 @@ class Repo:
         subprocess.run(["git", "rm", "-rf", "."])
         src = self.dir + "/"
         dest = self.mirror_dir + "/"
-        #subprocess.run(["rsync", "-rvh", "--progress", "--exclude", ".git/", src, dest])
         subprocess.run(["rsync", "-a", "--exclude", ".git/", src, dest])
 
     def update(self):
