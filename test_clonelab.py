@@ -10,8 +10,8 @@ def main():
         fieldnames = reader.fieldnames
         os.chdir("..")
         for row in reader:
-            repo = git.Repo(row["original_repository"], original)
-            mirror_repo = git.Repo(row["mirror_repository"], mirror)
+            repo = git.Repo(row["original_repository"], "original")
+            mirror_repo = git.Repo(row["mirror_repository"], "mirror")
             repo.sync()
 
     print("CLoneLab finished!  All repositories have been mirrored.")
@@ -23,11 +23,11 @@ def sync(repo, mirror_repo):
     repo.get()
     mirror_repo.get()
     if repo.get_commits() == 1:
-        continue
+        pass
     else:
         sys.exit(f"Error parsing commit history for {repo.url}")
     if mirror_repo.get_commits() == 1:
-        continue
+        pass
     else:
         sys.exit(f"Error parsing commit history for {mirror_repo.url}")
 
