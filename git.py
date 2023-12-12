@@ -10,9 +10,9 @@ class Repo:
         self.url = url
         self.kind = kind
         if self.url[:4] == "git@":
-            self.auth_method == "ssh"
+            self.authentication == "ssh"
         else:
-            self.auth_method == "https"
+            self.authentication == "https"
         self.username, self.password, self.domain, self.repo_owner, self.repo_name = self.parse_url
         self.dir = self.get_dir(self.url, self.kind, self.username, self.repo_name)
 
@@ -44,7 +44,7 @@ class Repo:
         commits = []
         current_commit = {
             "commit":"",
-            "author":"",
+            "authenticationor":"",
             "date":"",
             "message":""
         }
@@ -53,9 +53,9 @@ class Repo:
             if line[:7] == "commit ":
                 commit = line[7:]
                 current_commit["commit"] = commit
-            elif line[:8] == "Author: ":
-                author = line[8:]
-                current_commit["author"] = author
+            elif line[:8] == "authenticationor: ":
+                authenticationor = line[8:]
+                current_commit["authenticationor"] = authenticationor
             elif line[:6] == "Date: ":
                 date = line[8:]
                 current_commit["date"] = date
@@ -141,15 +141,15 @@ class Repo:
             for parent in parents:
                 branch_parents = branch_parents + f" {parent}"
             pull_request_num = matches[n - 4]
-            branch_author = matches[n - 3]
+            branch_authenticationor = matches[n - 3]
             branch_repo = matches[n - 2]
             merge_msg = matches[n - 1]
             message = (
-                f"Merge pull request #{pull_request_num} from {branch_author}/{branch_repo}\n"
+                f"Merge pull request #{pull_request_num} from {branch_authenticationor}/{branch_repo}\n"
                 f"{merge_msg}\n"
                 f"Branch Parents:{branch_parents}\n\n"
                 f"Original Commit Hash: {commit['commit']}\n"
-                f"Original Author: {commit['author']}\n"
+                f"Original authenticationor: {commit['authenticationor']}\n"
                 f"Original Date: {commit['date']}\n"
                 f"Repository {self.url} cloned using CloneLab"
             )
@@ -171,7 +171,7 @@ class Repo:
                     f"Merge branch {branch_name} of {branch_repo}\n"
                     f"Branch Parents:{branch_parents}\n\n"
                     f"Original Commit Hash: {commit['commit']}\n"
-                    f"Original Author: {commit['author']}\n"
+                    f"Original authenticationor: {commit['authenticationor']}\n"
                     f"Original Date: {commit['date']}\n"
                     f"Repository {self.url} cloned using CloneLab"
                 )
@@ -183,7 +183,7 @@ class Repo:
                     f"{merge_msg}\n"
                     f"Branch Parents:{branch_parents}\n\n"
                     f"Original Commit Hash: {commit['commit']}\n"
-                    f"Original Author: {commit['author']}\n"
+                    f"Original authenticationor: {commit['authenticationor']}\n"
                     f"Original Date: {commit['date']}\n"
                     f"Repository {self.url} cloned using CloneLab"
                 )
@@ -191,7 +191,7 @@ class Repo:
         message = (
             f"{commit['message']}\n"
             f"Original Commit Hash: {commit['commit']}\n"
-            f"Original Author: {commit['author']}\n"
+            f"Original authenticationor: {commit['authenticationor']}\n"
             f"Original Date: {commit['date']}\n"
             f"Repository {self.url} cloned using CloneLab"
         )
@@ -298,19 +298,19 @@ class Repo:
             os.makedirs("CloneLab-data")
         os.chdir("CloneLab-data")
 
-    # Getter for auth_method
+    # Getter for authentication
     @property
-    def auth_method(self):
-        return self._auth_method
+    def authentication(self):
+        return self._authentication
 
-    # Setter for auth_method
-    @auth_method.setter
-    def url(self, auth_method):
+    # Setter for authentication
+    @authentication.setter
+    def authentication(self, authentication):
         allowed_methods = ['ssh', 'https']
-        if auth_method.lower() in allowed_kinds:
-            self._auth_method = auth_method.lower()
+        if authentication.lower() in allowed_methods:
+            self._authentication = authentication.lower()
         else:
-            sys.exit(f"{auth_method} is not an allowed authorization method")
+            sys.exit(f"{authentication} is not an allowed authenticationorization method")
 
     # Getter for kind
     @property
@@ -319,7 +319,7 @@ class Repo:
 
     # Setter for kind
     @kind.setter
-    def url(self, kind):
+    def kind(self, kind):
         allowed_kinds = ['original', 'mirror']
         if kind.lower() in allowed_kinds:
             self._kind = kind.lower()
@@ -334,7 +334,6 @@ class Repo:
     # Setter for url
     @url.setter
     def url(self, url):
-        # Add url validation via regex here
         self._url = url
 
     # Getter for mirror_url
