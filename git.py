@@ -30,12 +30,15 @@ class Repo:
             rmtree(f"{self.path}")
             subprocess.run(['git', 'clone', self.url, self.path])
 
-    def get_commits(self, repository_folder):
+    def get_commits(self):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
-        os.chdir(f"{repository_folder}")
-        log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
-        commits = self.process_log(log_raw)
-        return commits
+        os.chdir(f"{self.dir}")
+        try:
+            log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
+            self.commits = self.process_log(log_raw)
+            return 1
+        except:
+            return 0
 
     def process_log(self, log):
         commits = []

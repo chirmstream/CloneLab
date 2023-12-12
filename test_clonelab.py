@@ -19,8 +19,18 @@ def main():
 
 
 def sync(repo, mirror_repo):
+    valid = 1
     repo.get()
     mirror_repo.get()
+    if repo.get_commits() == 1:
+        continue
+    else:
+        sys.exit(f"Error parsing commit history for {repo.url}")
+    if mirror_repo.get_commits() == 1:
+        continue
+    else:
+        sys.exit(f"Error parsing commit history for {mirror_repo.url}")
+
 
 
 main()
