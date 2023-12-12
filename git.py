@@ -10,9 +10,9 @@ class Repo:
         self.url = url
         self.kind = kind
         if self.url[:4] == "git@":
-            self.authentication == "ssh"
+            self.authentication = "ssh"
         else:
-            self.authentication == "https"
+            self.authentication = "https"
         self.username, self.password, self.domain, self.repo_owner, self.repo_name = self.parse_url
         self.dir = self.get_dir(self.url, self.kind, self.username, self.repo_name)
 
