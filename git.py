@@ -6,20 +6,20 @@ from shutil import rmtree
 
 
 class Repo:
-    def __init__(self, url, type):
+    def __init__(self, url, kind):
         self.url = url
-        self.type = type
+        self.kind = kind
         if self.url[:4] == "git@":
             self.auth_method == "ssh"
         else:
             self.auth_method == "https"
         self.username, self.password, self.domain, self.repo_owner, self.repo_name = self.parse_url
-        self.dir = self.get_dir(self.url, self.type, self.username, self.repo_name)
+        self.dir = self.get_dir(self.url, self.kind, self.username, self.repo_name)
 
-    def get_dir(self, url, type, repo_owner, repo_name):
-        if type == "original":
+    def get_dir(self, url, kind, repo_owner, repo_name):
+        if kind == "original":
             path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "repos", repo_owner, repo_name)
-        elif type == "mirror":
+        elif kind == "mirror":
             path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "mirror_repos", repo_owner, repo_name)
         return path
 
@@ -307,24 +307,24 @@ class Repo:
     @auth_method.setter
     def url(self, auth_method):
         allowed_methods = ['ssh', 'https']
-        if auth_method.lower() in allowed_types:
+        if auth_method.lower() in allowed_kinds:
             self._auth_method = auth_method.lower()
         else:
             sys.exit(f"{auth_method} is not an allowed authorization method")
 
-    # Getter for type
+    # Getter for kind
     @property
-    def type(self):
-        return self._type
+    def kind(self):
+        return self._kind
 
-    # Setter for type
-    @type.setter
-    def url(self, type):
-        allowed_types = ['original', 'mirror']
-        if type.lower() in allowed_types:
-            self._type = type.lower()
+    # Setter for kind
+    @kind.setter
+    def url(self, kind):
+        allowed_kinds = ['original', 'mirror']
+        if kind.lower() in allowed_kinds:
+            self._kind = kind.lower()
         else:
-            sys.exit(f"Repository type {type} not allowed")
+            sys.exit(f"Repository kind {kind} not allowed")
 
     # Getter for url
     @property
