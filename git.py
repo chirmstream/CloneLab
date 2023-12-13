@@ -43,7 +43,7 @@ class Repo:
     def get_commits(self, repository):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
         path = repository.dir
-        os.chdir(f"{repository.dir}")
+        os.chdir(f"{path}")
         try:
             log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
             self.commits = self.process_log(log_raw)
@@ -51,15 +51,6 @@ class Repo:
         except:
             return 0
         
-
-
-        os.chdir(f"{self.dir}")
-        try:
-            log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
-            self.commits = self.process_log(log_raw)
-            return 1
-        except:
-            return 0
 
     def process_log(self, log):
         commits = []
