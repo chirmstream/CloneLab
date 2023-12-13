@@ -14,24 +14,45 @@ class Repo:
         else:
             self.authentication = "https"
         self.username, self.password, self.domain, self.repo_owner, self.repo_name = self.parse_url(self.url)
-        self.dir = self.get_dir(self.kind, self.repo_owner, self.repo_name)
+        self.path = self.get_path(self.kind, self.repo_owner, self.repo_name)
 
-    def get_dir(self, kind, repo_owner, repo_name):
+    def get_path(self, kind, repo_owner, repo_name):
         if kind == "original":
             path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "repos", repo_owner, repo_name)
         elif kind == "mirror":
             path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "mirror_repos", repo_owner, repo_name)
         return path
 
-    def get(self):
-        if len(os.listdir(self.path)) == 0:
-                subprocess.run(['git', 'clone', self.url, self.path])
-        else:
-            rmtree(f"{self.path}")
-            subprocess.run(['git', 'clone', self.url, self.path])
+    def clone(self, original_repository):
+        self.get(original_repository)
+        self.get(self)
 
-    def get_commits(self):
+        commits = self.get_commits(original_repository)
+        mirror_commits = self.get_commits(self)
+        self.sync_first_commit(commits[0], mirror_commits[0])
+
+
+
+    def get(self, repository):
+        if len(os.listdir(repository.path)) == 0:
+                subprocess.run(['git', 'clone', repository.url, repository.path])
+        else:
+            rmtree(f"{repository.path}")
+            subprocess.run(['git', 'clone', repository.url, repository.path])
+
+    def get_commits(self, repository):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
+        path = repository.dir
+        os.chdir(f"{repository.dir}")
+        try:
+            log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
+            self.commits = self.process_log(log_raw)
+            return 1
+        except:
+            return 0
+        
+
+
         os.chdir(f"{self.dir}")
         try:
             log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
