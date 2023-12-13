@@ -14,10 +14,9 @@ class Repo:
         else:
             self.authentication = "https"
         self.username, self.password, self.domain, self.repo_owner, self.repo_name = self.parse_url(self.url)
+        self.dir = self.get_dir(self.kind, self.repo_owner, self.repo_name)
 
-        self.dir = self.get_dir(self.url, self.kind, self.username, self.repo_name)
-
-    def get_dir(self, url, kind, repo_owner, repo_name):
+    def get_dir(self, kind, repo_owner, repo_name):
         if kind == "original":
             path = os.path.join(os.path.expanduser("~"), "CloneLab-data", "repos", repo_owner, repo_name)
         elif kind == "mirror":
@@ -291,13 +290,13 @@ class Repo:
             repo_name = match.group(5)
             return username, password, domain, repo_owner, repo_name
         # Match non-authenticated https repos
-        match = re.search(r"^https://github.com/bitcoin/bitcoin.git$", url)
+        match = re.search(r"^https://(.+)/(.+)/(.+).git$", url)
         if match:
             username = None
             password = None
-            domain = "github.com"
-            repo_owner = "bitcoin"
-            repo_name = "bitcon"
+            domain = match.group(1)
+            repo_owner = match.group(2)
+            repo_name = match.group(3)
             return username, password, domain, repo_owner, repo_name
     
         sys.exit(f"Error, invalid url: {url}")
