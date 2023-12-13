@@ -13,12 +13,8 @@ class Repo:
             self.authentication = "ssh"
         else:
             self.authentication = "https"
-        username, password, domain, repo_owner, repo_name = self.parse_url(self.url)
-        self.username = username
-        self.password = password
-        self.domain = domain
-        self.repo_owner = repo_owner
-        self.repo_name = repo_name
+        self.username, self.password, self.domain, self.repo_owner, self.repo_name = self.parse_url(self.url)
+
         self.dir = self.get_dir(self.url, self.kind, self.username, self.repo_name)
 
     def get_dir(self, url, kind, repo_owner, repo_name):
