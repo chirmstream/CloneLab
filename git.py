@@ -13,7 +13,12 @@ class Repo:
             self.authentication = "ssh"
         else:
             self.authentication = "https"
-        self.username, self.password, self.domain, self.repo_owner, self.repo_name = self.parse_url
+        username, password, domain, repo_owner, repo_name = self.parse_url(self.url)
+        self.username = username
+        self.password = password
+        self.domain = domain
+        self.repo_owner = repo_owner
+        self.repo_name = repo_name
         self.dir = self.get_dir(self.url, self.kind, self.username, self.repo_name)
 
     def get_dir(self, url, kind, repo_owner, repo_name):
@@ -280,17 +285,26 @@ class Repo:
         subprocess.run(["git", "push"], cwd=self.mirror_dir)
 
     def parse_url(self, url):
-        try:
-            match = re.search(r"^https://(.+):(.+)@(.+)/(.+)/(.+).git$", url)
-            if match:
-                username = match.group(1)
-                password = match.group(2)
-                domain = match.group(3)
-                repo_owner = match.group(4)
-                repo_name = match.group(5)
-        except:
-            sys.exit(f"Error, invalid url: {url}")
-        return username, password, domain, repo_owner, repo_name
+        # Match authenticated https repos
+        match = re.search(r"^https://(.+):(.+)@(.+)/(.+)/(.+).git$", url)
+        if match:
+            username = match.group(1)
+            password = match.group(2)
+            domain = match.group(3)
+            repo_owner = match.group(4)
+            repo_name = match.group(5)
+            return username, password, domain, repo_owner, repo_name
+        # Match non-authenticated https repos
+        match = re.search(r"^https://github.com/bitcoin/bitcoin.git$", url)
+        if match:
+            username = None
+            password = None
+            domain = "github.com"
+            repo_owner = "bitcoin"
+            repo_name = "bitcon"
+            return username, password, domain, repo_owner, repo_name
+    
+        sys.exit(f"Error, invalid url: {url}")
 
     def reset_directory(self):
         os.chdir(os.path.expanduser("~"))
