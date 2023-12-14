@@ -34,6 +34,10 @@ class Repo:
 
 
     def get(self, repository):
+        if os.path.exists(repository.path):
+            pass
+        else:
+            os.makedirs(repository.path)
         if len(os.listdir(repository.path)) == 0:
                 subprocess.run(['git', 'clone', repository.url, repository.path])
         else:
