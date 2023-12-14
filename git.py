@@ -24,11 +24,13 @@ class Repo:
         return path
 
     def clone(self, original_repository):
+        # Clone repositories
         self.get(original_repository)
         self.get(self)
-
+        # Process commit history for both repositories
         commits = self.get_commits(original_repository)
         mirror_commits = self.get_commits(self)
+        # Clone original repo to mirror repo
         self.sync_first_commit(commits[0], mirror_commits[0])
 
 
@@ -46,15 +48,14 @@ class Repo:
 
     def get_commits(self, repository):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
-        path = repository.dir
+        path = repository.path
         os.chdir(f"{path}")
         try:
             log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
-            self.commits = self.process_log(log_raw)
-            return 1
+            commits = self.process_log(log_raw)
+            return commits
         except:
-            return 0
-        
+            sys.exit(f"Error parsing commits for {repository.url}")
 
     def process_log(self, log):
         commits = []
