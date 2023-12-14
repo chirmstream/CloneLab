@@ -31,8 +31,8 @@ class Repo:
         commits = self.get_commits(original_repository)
         mirror_commits = self.get_commits(self)
         # Clone original repo to mirror repo
-        self.sync_first_commit(commits[0], mirror_commits[0])
-
+        self.sync_first_commit(original_repository, commits[0], mirror_commits[0])
+        n = self.next(commits, mirror_commits)
 
 
     def get(self, repository):
@@ -214,15 +214,15 @@ class Repo:
         )
         return message
 
-    def sync_first_commit(self, first_commit, first_mirror_commit):
+    def sync_first_commit(self, original_repository, first_commit, first_mirror_commit):
         print(f"Checking first commit...")
         if self.commits_match(first_commit, first_mirror_commit) == False:
             print(f"Syncing first commit...")
             first_commit_hash = first_commit['commit']
-            os.chdir(f"{self.dir}")
+            os.chdir(f"{original_repository.path}")
             subprocess.run(["git", "checkout", first_commit_hash])
-            os.chdir(f"{self.mirror_dir}")
             # Create orphan branch 'temp', and delete everthing
+            os.chdir(f"{self.path}")
             subprocess.run(["git", "switch", "--orphan", "temp"])
             subprocess.run(["git", "rm", "-rf", "."])
             subprocess.run(["git", "clean", "-fd"])
@@ -231,15 +231,15 @@ class Repo:
             message = self.create_commit_msg(first_commit)
             self.commit(message)
             # Push code to remote branch 'temp' and delete 'temp' afterwards
-            os.chdir(f"{self.mirror_dir}")
+            os.chdir(f"{self.path}")
             subprocess.run(["git", "push", "-u", "origin", "temp"])
             subprocess.run(["git", "push", "-f", "origin", "temp:main"])
             subprocess.run(["git", "switch", "main"])
             subprocess.run(["git", "branch", "--delete", "temp"])
             subprocess.run(["git", "push", "origin", "--delete", "temp"])
             # Delete both repos and reclone from remote
+            self.get(original_repository.url, original_repository.dir)
             self.get(self.url, self.dir)
-            self.get(self.mirror_url, self.mirror_dir)
         else:
             print(f"First commit already already mirrored...")
 
