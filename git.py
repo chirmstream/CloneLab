@@ -298,8 +298,7 @@ class Repo:
             subprocess.run(["git", "switch", "-"])
 
     def add(self):
-        subprocess.run(["git", "add", "."], cwd=self.mirror_dir)
-        self.reset_directory()
+        subprocess.run(["git", "add", "."], cwd=self.path)
 
     def get_empty_directories(self, path):
         # Credit for this function goes to tutorialspoint.com, it was a very simple function though so I felt okay copying it.
