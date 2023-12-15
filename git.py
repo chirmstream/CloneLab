@@ -35,10 +35,10 @@ class Repo:
         # Find next commit to mirror
         n = self.next(commits, mirror_commits)
         if n == 1:
-            os.chdir(f"{self.mirror_dir}")
+            os.chdir(f"{self.path}")
             subprocess.run(["git", "checkout", "-b", "temp"])
         else:
-            os.chdir(f"{self.mirror_dir}")
+            os.chdir(f"{self.path}")
             subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
         # Sync remaining commits
         commits_made = 0
@@ -55,7 +55,7 @@ class Repo:
                 commits_made = 0
             os.chdir(f"{original_repository.path}")
             subprocess.run(["git", "checkout", commits[_]['commit']])
-            self.rsync()
+            self.rsync(original_repository.path, self.path)
             os.chdir(f"{self.path}")
             self.add()
             message = self.create_commit_msg(commits[_])
