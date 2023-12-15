@@ -265,8 +265,8 @@ class Repo:
             subprocess.run(["git", "branch", "--delete", "temp"])
             subprocess.run(["git", "push", "origin", "--delete", "temp"])
             # Delete both repos and reclone from remote
-            self.get(original_repository.url, original_repository.path)
-            self.get(self.url, self.path)
+            self.get(original_repository)
+            self.get(self)
         else:
             print(f"First commit already already mirrored...")
 
