@@ -32,8 +32,37 @@ class Repo:
         mirror_commits = self.get_commits(self)
         # Clone original repo to mirror repo
         self.sync_first_commit(original_repository, commits[0], mirror_commits[0])
+        # Find next commit to mirror
         n = self.next(commits, mirror_commits)
-
+        if n == 1:
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "checkout", "-b", "temp"])
+        else:
+            os.chdir(f"{self.mirror_dir}")
+            subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
+        # Sync remaining commits
+        commits_made = 0
+        for _ in range(n, len(commits)):
+            if commits_made > 150:
+                self.update()
+                # After pushing new commits we need reset back to how it was before we pushed code
+                os.chdir(f"{self.path}")
+                rmtree(f"{self.path}")
+                self.get(original_repository)
+                self.get(self)
+                mirror_commits = self.get_commits(self)
+                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']])
+                commits_made = 0
+            os.chdir(f"{original_repository.path}")
+            subprocess.run(["git", "checkout", commits[_]['commit']])
+            self.rsync()
+            os.chdir(f"{self.path}")
+            self.add()
+            message = self.create_commit_msg(commits[_])
+            self.commit(message)
+            commits_made = commits_made + 1
+        self.update()
+        print(f"Successfully mirrored {original_repository.url} to {self.url}")
 
     def get(self, repository):
         if os.path.exists(repository.path):
@@ -226,7 +255,7 @@ class Repo:
             subprocess.run(["git", "switch", "--orphan", "temp"])
             subprocess.run(["git", "rm", "-rf", "."])
             subprocess.run(["git", "clean", "-fd"])
-            self.rsync()
+            self.rsync(original_repository.path, self.path)
             self.add()
             message = self.create_commit_msg(first_commit)
             self.commit(message)
@@ -238,8 +267,8 @@ class Repo:
             subprocess.run(["git", "branch", "--delete", "temp"])
             subprocess.run(["git", "push", "origin", "--delete", "temp"])
             # Delete both repos and reclone from remote
-            self.get(original_repository.url, original_repository.dir)
-            self.get(self.url, self.dir)
+            self.get(original_repository.url, original_repository.path)
+            self.get(self.url, self.path)
         else:
             print(f"First commit already already mirrored...")
 
@@ -249,12 +278,12 @@ class Repo:
                 return True
         return False
 
-    def rsync(self):
+    def rsync(self, source, destination):
         # remove mirror repository files, then rsync original repository files to mirror
-        os.chdir(f"{self.mirror_dir}")
+        os.chdir(destination)
         subprocess.run(["git", "rm", "-rf", "."])
-        src = self.dir + "/"
-        dest = self.mirror_dir + "/"
+        src = source + "/"
+        dest = destination + "/"
         subprocess.run(["rsync", "-a", "--exclude", ".git/", src, dest])
 
     def update(self):
