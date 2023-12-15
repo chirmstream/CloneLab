@@ -308,14 +308,14 @@ class Repo:
 
     def commit(self, message):
         # Check for empty folders
-        empty_directories = self.get_empty_directories(self.mirror_dir)
+        empty_directories = self.get_empty_directories(self.path)
         if empty_directories:
             for empty_directory in empty_directories:
                 os.chdir(f"{empty_directory}")
                 with open(".gitkeep", "w") as file:
                     file.write("")
             print(empty_directories)
-        subprocess.run(["git", "commit", "--allow-empty", "-S", "-m", message], cwd=self.mirror_dir)
+        subprocess.run(["git", "commit", "--allow-empty", "-S", "-m", message], cwd=self.path)
 
     def push(self, remote_name="", branch_name=""):
         # Runs the 'git push' command (will push to wherever .git/config file url specifies)
