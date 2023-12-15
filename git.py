@@ -253,8 +253,6 @@ class Repo:
             # Create orphan branch 'temp', and delete everthing
             os.chdir(f"{self.path}")
             subprocess.run(["git", "switch", "--orphan", "temp"])
-            subprocess.run(["git", "rm", "-rf", "."])
-            subprocess.run(["git", "clean", "-fd"])
             self.rsync(original_repository.path, self.path)
             self.add()
             message = self.create_commit_msg(first_commit)
@@ -281,7 +279,6 @@ class Repo:
     def rsync(self, source, destination):
         # remove mirror repository files, then rsync original repository files to mirror
         os.chdir(destination)
-        subprocess.run(["git", "rm", "-rf", "."])
         src = source + "/"
         dest = destination + "/"
         subprocess.run(["rsync", "-a", "--exclude", ".git/", src, dest])
