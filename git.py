@@ -45,6 +45,8 @@ class Repo:
         for _ in range(n, len(commits)):
             if commits_made > 150:
                 self.update()
+                os.chdir(f"{original_repository.dir}")
+                subprocess.run(["git", "switch", "-"])
                 # After pushing new commits we need reset back to how it was before we pushed code
                 os.chdir(f"{self.path}")
                 rmtree(f"{self.path}")
@@ -62,6 +64,8 @@ class Repo:
             self.commit(message)
             commits_made = commits_made + 1
         self.update()
+        os.chdir(f"{original_repository.dir}")
+        subprocess.run(["git", "switch", "-"])
         print(f"Successfully mirrored {original_repository.url} to {self.url}")
 
     def get(self, repository):
@@ -156,6 +160,7 @@ class Repo:
         for _ in range(n, len(commits)):
             if commits_made > 150:
                 self.update()
+
                 # After pushing new commits we need reset back to how it was before we pushed code
                 os.chdir(f"{self.mirror_dir}")
                 rmtree(f"{self.mirror_dir}")
@@ -285,14 +290,12 @@ class Repo:
 
     def update(self):
             # Pushes temp branch, copies temp branch to main, then deletes temp branch
-            os.chdir(f"{self.mirror_dir}")
+            os.chdir(f"{self.path}")
             subprocess.run(["git", "push", "-u", "origin", "temp"])
             subprocess.run(["git", "push", "-f", "origin", "temp:main"])
             subprocess.run(["git", "switch", "main"])
             subprocess.run(["git", "branch", "--delete", "temp"])
             subprocess.run(["git", "push", "origin", "--delete", "temp"])
-            os.chdir(f"{self.dir}")
-            subprocess.run(["git", "switch", "-"])
 
     def add(self):
         subprocess.run(["git", "add", "."], cwd=self.path)
