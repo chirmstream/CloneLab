@@ -17,6 +17,9 @@ with open("git_config.csv", "r") as git_config:
 # Import GPG key
 subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
 
+# Import ssh keys
+TODO
+
 # Sync mirror repors
 with open("config.csv", "r") as csvfile:
     reader = csv.DictReader(csvfile)
