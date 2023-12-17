@@ -343,7 +343,16 @@ class Repo:
             repo_owner = match.group(2)
             repo_name = match.group(3)
             return username, password, domain, repo_owner, repo_name
-    
+        # Match ssh authenticated repos
+        match = re.search(r"^git@(.+):(.+)/(.+).git$", url)
+        if match:
+            username = None
+            password = None
+            domain = match.group(1)
+            repo_owner = match.group(2)
+            repo_name = match.group(3)
+            return username, password, domain, repo_owner, repo_name
+        # No valid url found
         sys.exit(f"Error, invalid url: {url}")
 
     def reset_directory(self):
