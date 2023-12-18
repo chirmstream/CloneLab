@@ -92,7 +92,7 @@ class Repo:
         commits = []
         current_commit = {
             "commit":"",
-            "authenticationor":"",
+            "author":"",
             "date":"",
             "message":""
         }
@@ -101,9 +101,9 @@ class Repo:
             if line[:7] == "commit ":
                 commit = line[7:]
                 current_commit["commit"] = commit
-            elif line[:8] == "authenticationor: ":
-                authenticationor = line[8:]
-                current_commit["authenticationor"] = authenticationor
+            elif line[:8] == "author: ":
+                author = line[8:]
+                current_commit["author"] = author
             elif line[:6] == "Date: ":
                 date = line[8:]
                 current_commit["date"] = date
@@ -191,15 +191,15 @@ class Repo:
             for parent in parents:
                 branch_parents = branch_parents + f" {parent}"
             pull_request_num = matches[n - 4]
-            branch_authenticationor = matches[n - 3]
+            branch_author = matches[n - 3]
             branch_repo = matches[n - 2]
             merge_msg = matches[n - 1]
             message = (
-                f"Merge pull request #{pull_request_num} from {branch_authenticationor}/{branch_repo}\n"
+                f"Merge pull request #{pull_request_num} from {branch_author}/{branch_repo}\n"
                 f"{merge_msg}\n"
                 f"Branch Parents:{branch_parents}\n\n"
                 f"Original Commit Hash: {commit['commit']}\n"
-                f"Original authenticationor: {commit['authenticationor']}\n"
+                f"Original author: {commit['author']}\n"
                 f"Original Date: {commit['date']}\n"
                 f"Repository {self.url} cloned using CloneLab"
             )
@@ -221,7 +221,7 @@ class Repo:
                     f"Merge branch {branch_name} of {branch_repo}\n"
                     f"Branch Parents:{branch_parents}\n\n"
                     f"Original Commit Hash: {commit['commit']}\n"
-                    f"Original authenticationor: {commit['authenticationor']}\n"
+                    f"Original author: {commit['author']}\n"
                     f"Original Date: {commit['date']}\n"
                     f"Repository {self.url} cloned using CloneLab"
                 )
@@ -233,7 +233,7 @@ class Repo:
                     f"{merge_msg}\n"
                     f"Branch Parents:{branch_parents}\n\n"
                     f"Original Commit Hash: {commit['commit']}\n"
-                    f"Original authenticationor: {commit['authenticationor']}\n"
+                    f"Original author: {commit['author']}\n"
                     f"Original Date: {commit['date']}\n"
                     f"Repository {self.url} cloned using CloneLab"
                 )
@@ -241,7 +241,7 @@ class Repo:
         message = (
             f"{commit['message']}\n"
             f"Original Commit Hash: {commit['commit']}\n"
-            f"Original authenticationor: {commit['authenticationor']}\n"
+            f"Original author: {commit['author']}\n"
             f"Original Date: {commit['date']}\n"
             f"Repository {self.url} cloned using CloneLab"
         )
@@ -372,7 +372,7 @@ class Repo:
         if authentication.lower() in allowed_methods:
             self._authentication = authentication.lower()
         else:
-            sys.exit(f"{authentication} is not an allowed authenticationorization method")
+            sys.exit(f"{authentication} is not an allowed authorization method")
 
     # Getter for kind
     @property
@@ -429,16 +429,6 @@ class Repo:
     def name(self, name):
         self._name = name
 
-    # Getter for dir
-    @property
-    def dir(self):
-        return self._dir
-    
-    # Setter for dir
-    @dir.setter
-    def dir(self, dir):
-        self._dir = dir
-
     # Getter for mirror_username
     @property
     def mirror_username(self):
@@ -448,23 +438,3 @@ class Repo:
     @mirror_username.setter
     def mirror_username(self, mirror_username):
         self._mirror_username = mirror_username
-
-    # Getter for mirror_name
-    @property
-    def mirror_name(self):
-        return self._mirror_name
-
-    # Setter for mirror_name
-    @mirror_name.setter
-    def mirror_name(self, mirror_name):
-        self._mirror_name = mirror_name
-
-    # Getter for mirror_dir
-    @property
-    def mirror_dir(self):
-        return self._mirror_dir
-
-    # Setter for mirror_dir
-    @mirror_dir.setter
-    def mirror_dir(self, mirror_dir):
-        self._mirror_dir = mirror_dir
