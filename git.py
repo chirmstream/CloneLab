@@ -96,33 +96,33 @@ class Repo:
             "date":"",
             "message":""
         }
+        message = None
         for _ in range(len(log)):
             line = log[_]
-            if line[:7] == "commit ":
-                commit = line[7:]
-                current_commit["commit"] = commit
-            elif line[:8] == "author: ":
-                author = line[8:]
-                current_commit["author"] = author
-            elif line[:6] == "Date: ":
-                date = line[8:]
-                current_commit["date"] = date
+            if message == None:
+                commit = re.search(r"^commit ([a-zA-Z0-9]+)$", line)
+                if commit:
+                    current_commit["commit"] = commit.group(1)
+                    continue
+                author = re.search(r"^Author: (.+) <(.+)>$", line)
+                if author:
+                    current_commit["author"] = f"{author.group(1)} <{author.group(2)}>"
+                    continue
+                date = re.search(r"^Date:[ ]+(.+)$", line)
+                if date:
+                    current_commit["date"] = date.group(1)
+                    continue
+                if line == "":
+                    message = ""
             else:
-                try:
-                    if log[_ + 1][:7] != "commit ":
-                        message = current_commit["message"] + line[4:]
-                        current_commit["message"] = message
-                    else:
-                        message = current_commit["message"] + line
-                        current_commit["message"] = message
-                        next_commit = current_commit.copy()
-                        commits.append(next_commit)
-                        current_commit["message"] = ""
-                except:
-                    message = current_commit["message"] + line
-                    current_commit["message"] = self.add_newline(message)
-                    next_commit = current_commit.copy()
+                message = message + line.strip()
+                if line == "":
+                    current_commit["message"] = message
+                    message = None
+                    next_commit = current_commit
                     commits.append(next_commit)
+                
+
         return commits
 
     def add_newline(self, s):
