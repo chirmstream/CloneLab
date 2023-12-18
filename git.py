@@ -179,6 +179,7 @@ class Repo:
         print(f"Successfully mirrored {self.url} to {self.mirror_url}")
 
     def create_commit_msg(self, commit):
+        # github seems to have changed message from starting with e: to or: name <email>...
         pull_requst = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from ([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)(.*)$", commit["message"])
         if pull_requst:
             matches = pull_requst.groups()
