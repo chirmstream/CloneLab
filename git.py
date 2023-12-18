@@ -43,13 +43,11 @@ class Repo:
         # Sync remaining commits
         commits_made = 0
         for _ in range(n, len(commits)):
-            if commits_made > 150:
+            if commits_made > 15:
                 self.update()
-                os.chdir(f"{original_repository.dir}")
+                os.chdir(f"{original_repository.path}")
                 subprocess.run(["git", "switch", "-"])
                 # After pushing new commits we need reset back to how it was before we pushed code
-                os.chdir(f"{self.path}")
-                rmtree(f"{self.path}")
                 self.get(original_repository)
                 self.get(self)
                 mirror_commits = self.get_commits(self)
@@ -82,7 +80,7 @@ class Repo:
     def get_commits(self, repository):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
         path = repository.path
-        os.chdir(f"{path}")
+        os.chdir(f"{path}") #Error here.
         try:
             log_raw = subprocess.check_output(["git", "log", "--reverse"], stderr=subprocess.STDOUT).decode("utf-8", errors='ignore').split("\n")
             commits = self.process_log(log_raw)
