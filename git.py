@@ -71,7 +71,10 @@ class Repo:
             os.makedirs(repository.path)
         # Clone if directory is empty, else remove all and try again
         if len(os.listdir(repository.path)) == 0:
-                subprocess.run(['git', 'clone', repository.url, repository.path])
+                path = repository.path
+                os.chdir(path)
+                os.chdir("..")
+                subprocess.run(['git', 'clone', repository.url])
         else:
             rmtree(f"{repository.path}")
             self.get(repository)
