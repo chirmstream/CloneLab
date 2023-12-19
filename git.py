@@ -117,7 +117,7 @@ class Repo:
                 if line == "":
                     message = ""
             else:
-                message = message + line.strip()
+                message = message + line.strip() + "\n"
                 if line == "":
                     current_commit["message"] = message
                     message = None
