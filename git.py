@@ -64,16 +64,17 @@ class Repo:
         print(f"Successfully mirrored {original_repository.url} to {self.url}")
 
     def get(self, repository):
+        # Make directory path if does not exist, else continue
         if os.path.exists(repository.path):
             pass
         else:
             os.makedirs(repository.path)
+        # Clone if directory is empty, else remove all and try again
         if len(os.listdir(repository.path)) == 0:
                 subprocess.run(['git', 'clone', repository.url, repository.path])
         else:
             rmtree(f"{repository.path}")
-            os.makedirs(repository.path)
-            subprocess.run(['git', 'clone', repository.url, repository.path])
+            self.get(repository)
 
     def get_commits(self, repository):
         # Some code borrowed from https://gist.github.com/091b765a071d1558464371042db3b959.git, thank you simonw
