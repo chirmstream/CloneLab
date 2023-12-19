@@ -14,7 +14,6 @@ def main():
             repo = git.Repo(row["original_repository"], "original")
             mirror_repo = git.Repo(row["mirror_repository"], "mirror")
             mirror_repo.clone(repo)
-            repo.sync()
 
     print("CLoneLab finished!  All repositories have been mirrored.")
     print("Exiting")

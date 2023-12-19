@@ -34,32 +34,36 @@ class Repo:
         self.sync_first_commit(original_repository, commits[0], mirror_commits[0])
         # Find next commit to mirror
         n = self.next(commits, mirror_commits)
-        if n == 1:
-            os.chdir(f"{self.path}")
-            subprocess.run(["git", "checkout", "-b", "temp"])
+        # Check for already up to date mirror, quit if up to date
+        if n == 0:
+            print("Repository mirror already up to date...")
         else:
-            os.chdir(f"{self.path}")
-            subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
-        # Sync remaining commits
-        commits_made = 0
-        for _ in range(n, len(commits)):
-            if commits_made > 15:
-                self.update()
-                # After pushing new commits we need reset back to how it was before we pushed code
-                self.get(self)
-                mirror_commits = self.get_commits(self)
-                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']])
-                commits_made = 0
-            os.chdir(f"{original_repository.path}")
-            subprocess.run(["git", "checkout", commits[_]['commit']])
-            self.rsync(original_repository.path, self.path)
-            os.chdir(f"{self.path}")
-            self.add()
-            message = self.create_commit_msg(commits[_])
-            self.commit(message)
-            commits_made = commits_made + 1
-        self.update()
-        print(f"Successfully mirrored {original_repository.url} to {self.url}")
+            if n == 1:
+                os.chdir(f"{self.path}")
+                subprocess.run(["git", "checkout", "-b", "temp"])
+            else:
+                os.chdir(f"{self.path}")
+                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
+            # Sync remaining commits
+            commits_made = 0
+            for _ in range(n, len(commits)):
+                if commits_made > 15:
+                    self.update()
+                    # After pushing new commits we need reset back to how it was before we pushed code
+                    self.get(self)
+                    mirror_commits = self.get_commits(self)
+                    subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']])
+                    commits_made = 0
+                os.chdir(f"{original_repository.path}")
+                subprocess.run(["git", "checkout", commits[_]['commit']])
+                self.rsync(original_repository.path, self.path)
+                os.chdir(f"{self.path}")
+                self.add()
+                message = self.create_commit_msg(commits[_])
+                self.commit(message)
+                commits_made = commits_made + 1
+            self.update()
+            print(f"Successfully mirrored {original_repository.url} to {self.url}")
 
     def get(self, repository):
         # Make directory path if does not exist, else continue
@@ -137,7 +141,8 @@ class Repo:
                 return _
             if self.commits_match(commit, mirror_commit) == False:
                 return _
-        sys.exit("Commits already mirrored")
+        # Repository mirror is already up to date!
+        return 0
 
     def create_commit_msg(self, commit):
         # github seems to have changed message from starting with e: to or: name <email>...
@@ -347,17 +352,6 @@ class Repo:
     def url(self, url):
         self._url = url
 
-    # Getter for mirror_url
-    @property
-    def mirror_url(self):
-        return self._mirror_url
-
-    # Setter for mirror_url
-    @mirror_url.setter
-    def mirror_url(self, mirror_url):
-        # Add url validation via regex here
-        self._mirror_url = mirror_url
-
     # Getter for username
     @property
     def username(self):
@@ -367,13 +361,3 @@ class Repo:
     @username.setter
     def username(self, username):
         self._username = username
-
-    # Getter for name
-    @property
-    def name(self):
-        return self._name
-
-    # Setter for name
-    @name.setter
-    def name(self, name):
-        self._name = name
