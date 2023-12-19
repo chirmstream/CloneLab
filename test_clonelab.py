@@ -5,7 +5,7 @@ import sys
 
 
 def main():
-    # Sync mirror repors
+    # Sync mirror repos
     with open("config.csv", "r") as csvfile:
         reader = csv.DictReader(csvfile)
         fieldnames = reader.fieldnames
@@ -17,20 +17,6 @@ def main():
 
     print("CLoneLab finished!  All repositories have been mirrored.")
     print("Exiting")
-
-
-def sync(repo, mirror_repo):
-    valid = 1
-    repo.get()
-    mirror_repo.get()
-    if repo.get_commits() == 1:
-        pass
-    else:
-        sys.exit(f"Error parsing commit history for {repo.url}")
-    if mirror_repo.get_commits() == 1:
-        pass
-    else:
-        sys.exit(f"Error parsing commit history for {mirror_repo.url}")
 
 
 main()
