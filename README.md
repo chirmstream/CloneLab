@@ -25,3 +25,6 @@ Create enviroment:
 Activate enviroment:
 
     . venv/bin/activate
+
+## GitLab Notes
+By default branch protection may hinder CloneLab's ability to push code.  Make sure "Allowed to force push" is enabled under ``Settings>Repository>Protected branches``.
