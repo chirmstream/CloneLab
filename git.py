@@ -139,43 +139,6 @@ class Repo:
                 return _
         sys.exit("Commits already mirrored")
 
-    def sync(self):
-        commits = self.get_commits(self.dir)
-        mirror_commits = self.get_commits(self.mirror_dir)
-        self.sync_first_commit(commits[0], mirror_commits[0])
-        print(f"Mirroring remaining commits...")
-        n = self.next(commits, mirror_commits)
-        # Create temp branch for mirror repo
-        if n == 1:
-            os.chdir(f"{self.mirror_dir}")
-            subprocess.run(["git", "checkout", "-b", "temp"])
-        else:
-            os.chdir(f"{self.mirror_dir}")
-            subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[n - 1]['commit']])
-        commits_made = 0
-        for _ in range(n, len(commits)):
-            if commits_made > 150:
-                self.update()
-
-                # After pushing new commits we need reset back to how it was before we pushed code
-                os.chdir(f"{self.mirror_dir}")
-                rmtree(f"{self.mirror_dir}")
-                self.set_dirs()
-                self.get(self.mirror_url, self.mirror_dir)
-                mirror_commits = self.get_commits(self.mirror_dir)
-                subprocess.run(["git", "checkout", "-b", "temp", mirror_commits[_ - 1]['commit']])
-                commits_made = 0
-            os.chdir(f"{self.dir}")
-            subprocess.run(["git", "checkout", commits[_]['commit']])
-            self.rsync()
-            os.chdir(f"{self.mirror_dir}")
-            self.add()
-            message = self.create_commit_msg(commits[_])
-            self.commit(message)
-            commits_made = commits_made + 1
-        self.update()
-        print(f"Successfully mirrored {self.url} to {self.mirror_url}")
-
     def create_commit_msg(self, commit):
         # github seems to have changed message from starting with e: to or: name <email>...
         pull_requst = re.search(r"^e: ([a-zA-Z0-9]+)* ([a-zA-Z0-9]+)Merge pull request #([0-9]+) from ([a-zA-Z0-9-_]+)/([a-zA-Z0-9-_]+)(.*)$", commit["message"])
