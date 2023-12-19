@@ -59,8 +59,6 @@ class Repo:
             self.commit(message)
             commits_made = commits_made + 1
         self.update()
-        os.chdir(f"{original_repository.dir}")
-        subprocess.run(["git", "switch", "-"])
         print(f"Successfully mirrored {original_repository.url} to {self.url}")
 
     def get(self, repository):
@@ -280,10 +278,6 @@ class Repo:
             print(empty_directories)
         subprocess.run(["git", "commit", "--allow-empty", "-S", "-m", message], cwd=self.path)
 
-    def push(self, remote_name="", branch_name=""):
-        # Runs the 'git push' command (will push to wherever .git/config file url specifies)
-        subprocess.run(["git", "push"], cwd=self.mirror_dir)
-
     def parse_url(self, url):
         # Match authenticated https repos
         match = re.search(r"^https://(.+):(.+)@(.+)/(.+)/(.+).git$", url)
@@ -314,12 +308,6 @@ class Repo:
             return username, password, domain, repo_owner, repo_name
         # No valid url found
         sys.exit(f"Error, invalid url: {url}")
-
-    def reset_directory(self):
-        os.chdir(os.path.expanduser("~"))
-        if not os.path.isdir("CloneLab-data"):
-            os.makedirs("CloneLab-data")
-        os.chdir("CloneLab-data")
 
     # Getter for authentication
     @property
@@ -389,13 +377,3 @@ class Repo:
     @name.setter
     def name(self, name):
         self._name = name
-
-    # Getter for mirror_username
-    @property
-    def mirror_username(self):
-        return self._mirror_username
-
-    # Setter for mirror_username
-    @mirror_username.setter
-    def mirror_username(self, mirror_username):
-        self._mirror_username = mirror_username

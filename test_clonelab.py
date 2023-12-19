@@ -34,5 +34,4 @@ def sync(repo, mirror_repo):
         sys.exit(f"Error parsing commit history for {mirror_repo.url}")
 
 
-
 main()
