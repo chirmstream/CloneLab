@@ -119,10 +119,8 @@ class Repo:
                 if line == "":
                     current_commit["message"] = message
                     message = None
-                    next_commit = current_commit
+                    next_commit = current_commit.copy()
                     commits.append(next_commit)
-                
-
         return commits
 
     def add_newline(self, s):
