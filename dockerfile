@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 # Setup CloneLab (use git clone in future)
 WORKDIR /root
-RUN git clone https://github.com/chirmstream/CloneLab.git
+RUN git clone -b rewrite https://github.com/chirmstream/CloneLab.git
 
 # Copy example config from /root/CloneLab
 WORKDIR /home/
@@ -19,6 +19,9 @@ RUN mkdir CloneLab
 WORKDIR /home/CloneLab/
 RUN mkdir config
 RUN cp /root/CloneLab/config.csv.example /home/CloneLab/config/config
+WORKDIR /home/CloneLab/config
+RUN mkdir ssh
+RUN cp /root/ssh_config.example /home/CloneLab/config/ssh/config
 
 # Run CloneLab
 WORKDIR /home/CloneLab/config/

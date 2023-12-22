@@ -18,10 +18,10 @@ with open("git_config.csv", "r") as git_config:
 subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
 
 # Import ssh keys
-TODO
-
-# Configure ssh port
-TODO
+subprocess.run('cp' '/home/CloneLab/config/ssh/config' '/root/.ssh/')
+subprocess.run('chmod' '600' '~/.ssh/id_rsa')
+subprocess.run('chmod' '600' '~/.ssh/id_rsa.pub')
+subprocess.run('chmod' '700' '~/.ssh')
 
 # Sync mirror repors
 with open("config.csv", "r") as csvfile:
