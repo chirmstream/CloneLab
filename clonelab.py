@@ -18,7 +18,11 @@ with open("git_config.csv", "r") as git_config:
 subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
 
 # Import ssh keys
-subprocess.run('cp' '/home/CloneLab/config/ssh' '~/.ssh/')
+os.chdir("ssh")
+with open("puth-keys-here", "w") as file:
+    file.write("")
+os.chdir("..")
+subprocess.run('cp' './ssh' '~/.ssh/')
 subprocess.run('chmod' '600' '~/.ssh/id_rsa')
 subprocess.run('chmod' '600' '~/.ssh/id_rsa.pub')
 subprocess.run('chmod' '700' '~/.ssh')
