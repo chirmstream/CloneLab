@@ -5,6 +5,8 @@ import subprocess
 
 
 # Configure git
+cwd = os.getcwd()
+print(cwd)
 os.chdir("config")
 with open("git_config.csv", "r") as git_config:
     reader = csv.DictReader(git_config)
