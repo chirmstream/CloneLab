@@ -1,4 +1,4 @@
-FROM ubuntu:lunar-20231004
+FROM ubuntu:jammy
 LABEL "author"="chirmstream"
 LABEL version="x.x.x"
 
