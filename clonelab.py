@@ -7,6 +7,7 @@ import subprocess
 # Configure git
 cwd = os.getcwd()
 print(cwd)
+print("Importing Git Configuration")
 os.chdir("config")
 with open("git_config.csv", "r") as git_config:
     reader = csv.DictReader(git_config)
@@ -26,10 +27,10 @@ os.chdir("ssh-config")
 with open("put-keys-here", "w") as file:
     file.write("")
 os.chdir("..")
-subprocess.run('cp' './ssh-config' '~/.ssh/')
-subprocess.run('chmod' '600' '~/.ssh/id_rsa')
-subprocess.run('chmod' '600' '~/.ssh/id_rsa.pub')
-subprocess.run('chmod' '700' '~/.ssh')
+subprocess.run('cp', './ssh-config', '~/.ssh/')
+subprocess.run('chmod', '600', '~/.ssh/id_rsa')
+subprocess.run('chmod', '600', '~/.ssh/id_rsa.pub')
+subprocess.run('chmod', '700', '~/.ssh')
 
 # Sync mirror repors
 os.chdir("config")
