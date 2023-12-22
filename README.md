@@ -14,6 +14,7 @@ gpg --import-options restore --import private.gpg
 ## Docker container mapping
 docker run \
     -v /example-host/config:/home/CloneLab/config \
+    -v /example-host/config/ssh:/home/CloneLab/config/ssh \
     -v /example-host/data:/root/CloneLab-data
 
 
