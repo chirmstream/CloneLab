@@ -18,12 +18,11 @@ WORKDIR /home/
 RUN mkdir CloneLab
 WORKDIR /home/CloneLab/
 RUN mkdir config
-WORKDIR /home/CloneLab/config
-RUN mkdir ssh
+RUN mkdir ssh-config
 
 RUN cp /root/CloneLab/config.csv.example /home/CloneLab/config/config
-RUN cp /root/CloneLab/ssh_config.example /home/CloneLab/config/ssh/config
+RUN cp /root/CloneLab/ssh_config.example /home/CloneLab/ssh-config/config
 
 # Run CloneLab
-WORKDIR /home/CloneLab/config/
+WORKDIR /home/CloneLab/
 CMD ["python3", "/root/CloneLab/clonelab.py", "/home/CloneLab/config/config"]
