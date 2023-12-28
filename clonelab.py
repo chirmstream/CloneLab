@@ -29,7 +29,7 @@ def main():
         file.write("")
     with open("config", "r") as file:
         config = file
-    with open("id_ed25519" "r") as file:
+    with open("id_ed25519", "r") as file:
         ssh_private_key = file
     with open("id_ed25519.pub" "r") as file:
         ssh_public_key = file
