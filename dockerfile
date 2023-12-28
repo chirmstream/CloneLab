@@ -1,6 +1,6 @@
 FROM ubuntu:jammy
 LABEL "author"="chirmstream"
-LABEL version="x.x.x"
+LABEL version="0.1"
 
 # Install requirements
 RUN apt-get update && apt-get install -y \
