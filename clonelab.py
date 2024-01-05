@@ -8,7 +8,7 @@ import subprocess
 # Starting working directory is /home/CloneLab/
 def main():
     # Configure git
-    print("Importing Git Configuration")
+    print("Importing git configuration")
     os.chdir("config")
     with open("git_config.csv", "r") as git_config:
         reader = csv.DictReader(git_config)
@@ -18,19 +18,27 @@ def main():
             email = row["email"]
             subprocess.run(['git', 'config', '--global', 'user.name', username])
             subprocess.run(['git', 'config', '--global', 'user.email', email])
-    print("Git Import Done...")
+    print("Git import done...")
+
 
     # Import GPG key
-    print("Importing GPG Key")
+    print("Importing GPG key")
     subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
-    print("GPG Key Importing Done...")
+    print("GPG key importing done...")
 
-    # Import ssh keys
-    print("Importing SSH Keys")
+
+    # Generating SSH Keys
     os.chdir("..")
     os.chdir("ssh-config")
-    with open("put-keys-here", "w") as file:
-        file.write("")
+    print("Checking for SSH keys")
+    # Check for existing keys
+    # If no keys exist, generate new keys
+    # print("No SSH keys found, generating new")
+        #subprocess.run(['ssh-keygen', '-t', 'ed25519', '-C', f{comment}])
+        # Save keys to folder
+    # print(Generated keys saved to (folder), please add public key to git repository..."")
+    # Else: Import existing keys
+    print("Existing SSH keys found, importing...")
     with open("config", "r") as file:
         config = file.readlines()
     with open("id_ed25519", "r") as file:
@@ -39,7 +47,8 @@ def main():
         ssh_public_key = file.readlines()
     if ssh_setup(config, ssh_private_key, ssh_public_key) != True:
         sys.exit("Error setting up SSH")
-    print("SSH Key Importing Done...")
+    print("SSH Key imported...")
+    print("No custom SSH config found, using default...")
 
 
 
