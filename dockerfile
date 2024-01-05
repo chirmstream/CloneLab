@@ -20,8 +20,8 @@ WORKDIR /home/CloneLab/
 RUN mkdir config
 RUN mkdir ssh-config
 
-RUN cp /root/CloneLab/config.csv.example /home/CloneLab/config/config
-RUN cp /root/CloneLab/ssh_config.example /home/CloneLab/ssh-config/config
+RUN cp /root/CloneLab/example_files/config.csv.example /home/CloneLab/config/config.example
+RUN cp /root/CloneLab/example_files/ssh_config.example /home/CloneLab/ssh-config/config.example
 
 # Run CloneLab
 WORKDIR /home/CloneLab/

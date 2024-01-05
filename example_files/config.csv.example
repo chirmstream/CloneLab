@@ -1,4 +1,3 @@
 original_repository,mirror_repository
 "https://github.com/bitcoin/bitcoin.git","https://username:password@domain.com/username/repo-name.git"
 "https://dev.gnupg.org/source/gnupg.git","git@domain.com/username/repo-name.git"
-"https://github.com/openssl/openssl.git","https://github.com/chirmstream/openssl.git"
