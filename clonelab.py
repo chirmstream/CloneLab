@@ -27,32 +27,37 @@ def main():
     print("GPG key importing done...")
 
 
-    # Generating SSH Keys
+    # Import/Generate SSH keys and config
     os.chdir("..")
     os.chdir("ssh-config")
     print("Checking for SSH keys")
     ssh_files = []
     for file in os.listdir():
         ssh_files.append(file)
-    print(ssh_files)
-    # Check for existing keys
-    # If no keys exist, generate new keys
-    # print("No SSH keys found, generating new")
+    if "id_ed25519" in ssh_files and "id_ed25519.pub" in ssh_files:
+        print("Existing SSH keys found, importing...")
+        with open("id_ed25519", "r") as file:
+            ssh_private_key = file.readlines()
+        with open("id_ed25519.pub", "r") as file:
+            ssh_public_key = file.readlines()
+        if ssh_key_import(ssh_private_key, ssh_public_key) != True:
+            sys.exit("Error importing SSH keys")
+        print("SSH Key imported...")
+    #else:
+        #generate new keys
         #subprocess.run(['ssh-keygen', '-t', 'ed25519', '-C', f{comment}])
         # Save keys to folder
-    # print(Generated keys saved to (folder), please add public key to git repository..."")
-    # Else: Import existing keys
-    print("Existing SSH keys found, importing...")
-    with open("config", "r") as file:
-        config = file.readlines()
-    with open("id_ed25519", "r") as file:
-        ssh_private_key = file.readlines()
-    with open("id_ed25519.pub", "r") as file:
-        ssh_public_key = file.readlines()
-    if ssh_setup(config, ssh_private_key, ssh_public_key) != True:
-        sys.exit("Error setting up SSH")
-    print("SSH Key imported...")
-    print("No custom SSH config found, using default...")
+        # print(Generated keys saved to (folder), please add public key to git repository..."")
+    print("Checking for SSH config")
+    if "config" in ssh_files:
+        print("SSH config found")
+        with open("config", "r") as file:
+            config = file.readlines()
+        if ssh_config_import(config) != True:
+            sys.exit("Error importing SSH config")
+        print("SSH config imported...")
+    else:
+        print("No SSH config found, using default")   
 
 
 
@@ -76,12 +81,9 @@ def main():
     print("Exiting")
 
 
-def ssh_setup(config, private_key, public_key):
+def ssh_key_import(private_key, public_key):
     user_path = os.path.expanduser("~")
     if os.path.exists(f"{user_path}/.ssh"):
-        with open("config", "w") as file:
-            for line in config:
-                file.write(line)
         with open("id_ed25519", "w") as file:
             for line in private_key:
                 file.write(line)
@@ -90,7 +92,19 @@ def ssh_setup(config, private_key, public_key):
                 file.write(line)
     else:
         os.makedirs(f"{user_path}/.ssh")
-        return ssh_setup(config, private_key, public_key)
+        return ssh_key_import(private_key, public_key)
+    return True
+
+
+def ssh_config_import(config):
+    user_path = os.path.expanduser("~")
+    if os.path.exists(f"{user_path}/.ssh"):
+        with open("config", "w") as file:
+            for line in config:
+                file.write(line)
+    else:
+        os.makedirs(f"{user_path}/.ssh")
+        return ssh_config_import(config)
     return True
 
 
