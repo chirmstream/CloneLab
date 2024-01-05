@@ -62,11 +62,14 @@ def ssh_setup(config, private_key, public_key):
     user_path = os.path.expanduser("~")
     if os.path.exists(f"{user_path}/.ssh"):
         with open("config", "w") as file:
-            file.write(config)
+            for line in config:
+                file.write(line)
         with open("id_ed25519", "w") as file:
-            file.write(private_key)
+            for line in private_key:
+                file.write(line)
         with open("id_ed25519.pub", "w") as file:
-            file.write(public_key)
+            for line in public_key:
+                file.write(line)
     else:
         os.makedirs(f"{user_path}/.ssh")
         return ssh_setup(config, private_key, public_key)
