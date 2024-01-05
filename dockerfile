@@ -25,6 +25,6 @@ RUN cp /root/CloneLab/ssh_config.example /home/CloneLab/ssh-config/config
 
 # Run CloneLab
 WORKDIR /home/CloneLab/
-ENTRYPOINT ["tail"]
-CMD ["-f","/dev/null"]
-#CMD ["python3", "/root/CloneLab/clonelab.py", "/home/CloneLab/config/config"]
+#ENTRYPOINT ["tail"]
+#CMD ["-f","/dev/null"]
+CMD ["python3", "/root/CloneLab/clonelab.py", "/home/CloneLab/config/config"]
