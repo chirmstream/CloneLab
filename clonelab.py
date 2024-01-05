@@ -43,6 +43,11 @@ def main():
         print("SSH Key imported...")
     else:
         print("Generating new SSH keys")
+        user_path = os.path.expanduser("~")
+        if os.path.exists(f"{user_path}/.ssh"):
+            pass
+        else:
+            os.mkdir(f"{user_path}/.ssh")
         subprocess.run(['ssh-keygen', '-t', 'ed25519', '-C', 'clonelab'])
         user_path = os.path.expanduser("~")
         with open(f"{user_path}/id_ed25519", "r") as file:
