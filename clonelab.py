@@ -31,6 +31,10 @@ def main():
     os.chdir("..")
     os.chdir("ssh-config")
     print("Checking for SSH keys")
+    ssh_files = []
+    for file in os.listdir():
+        ssh_files.append(file)
+    print(ssh_files)
     # Check for existing keys
     # If no keys exist, generate new keys
     # print("No SSH keys found, generating new")
