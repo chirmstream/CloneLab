@@ -28,11 +28,11 @@ def main():
     with open("put-keys-here", "w") as file:
         file.write("")
     with open("config", "r") as file:
-        config = file
+        config = file.readlines()
     with open("id_ed25519", "r") as file:
-        ssh_private_key = file
+        ssh_private_key = file.readlines()
     with open("id_ed25519.pub", "r") as file:
-        ssh_public_key = file
+        ssh_public_key = file.readlines()
     if ssh_setup(config, ssh_private_key, ssh_public_key) != True:
         sys.exit("Error setting up SSH")
 
