@@ -41,11 +41,19 @@ def main():
         if ssh_key_import(ssh_private_key, ssh_public_key) != True:
             sys.exit("Error importing SSH keys")
         print("SSH Key imported...")
-    #else:
-        #generate new keys
-        #subprocess.run(['ssh-keygen', '-t', 'ed25519', '-C', f{comment}])
-        # Save keys to folder
-        # print(Generated keys saved to (folder), please add public key to git repository..."")
+    else:
+        print("Generating new SSH keys")
+        subprocess.run(['ssh-keygen', '-t', 'ed25519', '-C', 'clonelab'])
+        user_path = os.path.expanduser("~")
+        with open(f"{user_path}/id_ed25519", "r") as file:
+            private_key = file.readlines()
+            with open("id_ed25519", "w") as file:
+                file.write(private_key)
+        with open(f"{user_path}/id_ed25519.pub", "r") as file:
+            public_key = file.readlines()
+            with open("id_ed25519.pub", "w") as file:
+                file.write(public_key)
+        print('Generated keys saved to "ssh-config", please add public key to git repository...')
     print("Checking for SSH config")
     if "config" in ssh_files:
         print("SSH config found")
