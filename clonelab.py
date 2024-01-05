@@ -18,11 +18,15 @@ def main():
             email = row["email"]
             subprocess.run(['git', 'config', '--global', 'user.name', username])
             subprocess.run(['git', 'config', '--global', 'user.email', email])
+    print("Git Import Done...")
 
     # Import GPG key
+    print("Importing GPG Key")
     subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
+    print("GPG Key Importing Done...")
 
     # Import ssh keys
+    print("Importing SSH Keys")
     os.chdir("..")
     os.chdir("ssh-config")
     with open("put-keys-here", "w") as file:
@@ -35,6 +39,7 @@ def main():
         ssh_public_key = file.readlines()
     if ssh_setup(config, ssh_private_key, ssh_public_key) != True:
         sys.exit("Error setting up SSH")
+    print("SSH Key Importing Done...")
 
 
 
