@@ -33,7 +33,6 @@ def main():
         ssh_private_key = file
     with open("id_ed25519.pub", "r") as file:
         ssh_public_key = file
-
     if ssh_setup(config, ssh_private_key, ssh_public_key) != True:
         sys.exit("Error setting up SSH")
 
