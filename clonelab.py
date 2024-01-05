@@ -20,12 +20,10 @@ def main():
             subprocess.run(['git', 'config', '--global', 'user.email', email])
     print("Git import done...")
 
-
     # Import GPG key
     print("Importing GPG key")
     subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
     print("GPG key importing done...")
-
 
     # Import/Generate SSH keys and config
     os.chdir("..")
@@ -59,8 +57,6 @@ def main():
     else:
         print("No SSH config found, using default")   
 
-
-
     #os.chdir("..")
     #subprocess.run('cp', './ssh-config', '~/.ssh/')
     #subprocess.run('chmod', '600', '~/.ssh/id_rsa')
@@ -68,6 +64,7 @@ def main():
     #subprocess.run('chmod', '700', '~/.ssh')
 
     # Sync mirror repors
+    os.chdir("..")
     os.chdir("config")
     with open("config.csv", "r") as csvfile:
         reader = csv.DictReader(csvfile)
