@@ -91,10 +91,9 @@ def main():
 
     # Apply correct ownership and permission to SSH Keys
     print("Applying SSH ownership and permissions")
-    subprocess.run('chmod', '700', '/root/.ssh')
-    subprocess.run('chmod', '644', '/root/.ssh/id_ed25519')
-    subprocess.run('chmod', '600', '/root/.ssh/id_ed25519.pub')
-
+    subprocess.run(['chmod', '700', '/root/.ssh'])
+    subprocess.run(['chmod', '644', '/root/.ssh/id_ed25519'])
+    subprocess.run(['chmod', '600', '/root/.ssh/id_ed25519.pub'])
 
     # Sync mirror repors
     os.chdir("..")
