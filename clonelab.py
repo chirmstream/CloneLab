@@ -44,15 +44,19 @@ def main():
         ssh_path = f"{user_path}/.ssh"
         if os.path.exists(ssh_path):
             with open(f"{ssh_path}/id_ed25519", "w") as file:
-                file.write(ssh_private_key)
+                for line in ssh_private_key:
+                    file.write(line)
             with open(f"{ssh_path}/id_ed25519.pub", "w") as file:
-                file.write(ssh_public_key)
+                for line in ssh_public_key:
+                    file.write(line)
         else:
             os.mkdir(ssh_path)
             with open(f"{ssh_path}/id_ed25519", "w") as file:
-                file.write(ssh_private_key)
+                for line in ssh_private_key:
+                    file.write(line)
             with open(f"{ssh_path}/id_ed25519.pub", "w") as file:
-                file.write(ssh_public_key)
+                for line in ssh_public_key:
+                    file.write(line)
         print("SSH keys imported...")
     else:
         print("Generating new SSH keys")
