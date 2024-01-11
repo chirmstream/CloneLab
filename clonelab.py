@@ -89,11 +89,12 @@ def main():
     else:
         print("No SSH config found, using default")   
 
-    #os.chdir("..")
-    #subprocess.run('cp', './ssh-config', '~/.ssh/')
-    #subprocess.run('chmod', '600', '~/.ssh/id_rsa')
-    #subprocess.run('chmod', '600', '~/.ssh/id_rsa.pub')
-    #subprocess.run('chmod', '700', '~/.ssh')
+    # Apply correct ownership and permission to SSH Keys
+    print("Applying SSH ownership and permissions")
+    subprocess.run('chmod', '700', '~/.ssh')
+    subprocess.run('chmod', '644', '~/.ssh/id_ed25519')
+    subprocess.run('chmod', '600', '~/.ssh/id_ed25519.pub')
+
 
     # Sync mirror repors
     os.chdir("..")
