@@ -24,7 +24,7 @@ def main():
     subprocess.run(['gpg', '--import', '-ownertrust', 'private.gpg'])
     print("GPG key importing done...")
 
-    # Import/Generate SSH keys and config
+    # Import/Generate SSH keys
     os.chdir("..")
     os.chdir("ssh-config")
     print("Checking for SSH keys")
@@ -39,7 +39,21 @@ def main():
             ssh_public_key = file.readlines()
         if ssh_key_import(ssh_private_key, ssh_public_key) != True:
             sys.exit("Error importing SSH keys")
-        print("SSH Key imported...")
+        print("    SSH keys read from disk...")
+        user_path = os.path.expanduser("~")
+        ssh_path = f"{user_path}/.ssh"
+        if os.path.exists(ssh_path):
+            with open(f"{ssh_path}/id_ed25519", "w") as file:
+                file.write(ssh_private_key)
+            with open(f"{ssh_path}/id_ed25519.pub", "w") as file:
+                file.write(ssh_public_key)
+        else:
+            os.mkdir(ssh_path)
+            with open(f"{ssh_path}/id_ed25519", "w") as file:
+                file.write(ssh_private_key)
+            with open(f"{ssh_path}/id_ed25519.pub", "w") as file:
+                file.write(ssh_public_key)
+        print("SSH keys imported...")
     else:
         print("Generating new SSH keys")
         user_path = os.path.expanduser("~")
@@ -58,6 +72,8 @@ def main():
             with open("id_ed25519.pub", "w") as file:
                 file.write(public_key)
         print('Generated keys saved to "ssh-config", please add public key to git repository...')
+
+    # Import ssh configuration (if given)
     print("Checking for SSH config")
     if "config" in ssh_files:
         print("SSH config found")
