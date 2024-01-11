@@ -50,11 +50,11 @@ def main():
             os.mkdir(f"{user_path}/.ssh")
         subprocess.run(['ssh-keygen', '-t', 'ed25519', '-C', 'clonelab', '-f', '~/.ssh/ed25519', '-q', '-N', '""'])
         user_path = os.path.expanduser("~")
-        with open(f"{user_path}/id_ed25519", "r") as file:
+        with open(f"{user_path}/.ssh/id_ed25519", "r") as file:
             private_key = file.readlines()
             with open("id_ed25519", "w") as file:
                 file.write(private_key)
-        with open(f"{user_path}/id_ed25519.pub", "r") as file:
+        with open(f"{user_path}/.ssh/id_ed25519.pub", "r") as file:
             public_key = file.readlines()
             with open("id_ed25519.pub", "w") as file:
                 file.write(public_key)
