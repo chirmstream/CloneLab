@@ -12,7 +12,6 @@ def main():
     os.chdir("config")
     with open("git_config.csv", "r") as git_config:
         reader = csv.DictReader(git_config)
-        fieldnames = reader.fieldnames
         for row in reader:
             username = row["username"]
             email = row["email"]
