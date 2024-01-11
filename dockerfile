@@ -27,4 +27,4 @@ ADD https://raw.githubusercontent.com/chirmstream/CloneLab/rewrite/example_files
 WORKDIR /home/CloneLab/
 #ENTRYPOINT ["tail"]
 #CMD ["-f","/dev/null"]
-CMD ["python3", "/root/CloneLab/clonelab.py"]
+CMD ["python3", "-u", "/root/CloneLab/clonelab.py"]
