@@ -138,4 +138,12 @@ def ssh_config_import(config):
     return True
 
 
+def ssh_known_hosts_import(known_hosts):
+    user_path = os.path.expanduser("~")
+    path = f"{user_path}/.ssh"
+    with open("known_hosts", "w") as file:
+        for line in known_hosts:
+            file.write(line)
+
+
 main()
