@@ -126,6 +126,7 @@ def ssh_key_import(private_key, public_key):
 
 
 def ssh_config_import(config):
+    # TO-DO Need to add known_hosts so that we connect to github.com
     user_path = os.path.expanduser("~")
     if os.path.exists(f"{user_path}/.ssh"):
         with open("config", "w") as file:
