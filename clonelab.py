@@ -27,74 +27,36 @@ def main():
     # Import/Generate SSH keys
     os.chdir("..")
     os.chdir("ssh-config")
+    check_ssh_path()
     print("Checking for SSH keys")
     ssh_files = []
     for file in os.listdir():
         ssh_files.append(file)
-    if "id_ed25519" in ssh_files and "id_ed25519.pub" in ssh_files:
+    ssh_keys = key_search()
+    if ssh_keys:
         print("Existing SSH keys found, importing...")
-        with open("id_ed25519", "r") as file:
-            ssh_private_key = file.readlines()
-        with open("id_ed25519.pub", "r") as file:
-            ssh_public_key = file.readlines()
-        if ssh_key_import(ssh_private_key, ssh_public_key) != True:
-            sys.exit("Error importing SSH keys")
+        ssh_private_key, ssh_public_key = ssh_read_keys()
         print("    SSH keys read from disk...")
-        user_path = os.path.expanduser("~")
-        ssh_path = f"{user_path}/.ssh"
-        if os.path.exists(ssh_path):
-            with open(f"{ssh_path}/id_ed25519", "w") as file:
-                for line in ssh_private_key:
-                    file.write(line)
-            with open(f"{ssh_path}/id_ed25519.pub", "w") as file:
-                for line in ssh_public_key:
-                    file.write(line)
-        else:
-            os.mkdir(ssh_path)
-            with open(f"{ssh_path}/id_ed25519", "w") as file:
-                for line in ssh_private_key:
-                    file.write(line)
-            with open(f"{ssh_path}/id_ed25519.pub", "w") as file:
-                for line in ssh_public_key:
-                    file.write(line)
+        ssh_key_import(ssh_private_key, ssh_public_key)
         print("SSH keys imported...")
     else:
-        print("Generating new SSH keys")
-        user_path = os.path.expanduser("~")
-        if os.path.exists(f"{user_path}/.ssh"):
-            pass
-        else:
-            os.mkdir(f"{user_path}/.ssh")
-        subprocess.run(['ssh-keygen', '-t', 'ed25519', '-C', 'clonelab', '-f', '~/.ssh/ed25519', '-q', '-N', '""'])
-        user_path = os.path.expanduser("~")
-        with open(f"{user_path}/.ssh/id_ed25519", "r") as file:
-            private_key = file.readlines()
-            with open("id_ed25519", "w") as file:
-                file.write(private_key)
-        with open(f"{user_path}/.ssh/id_ed25519.pub", "r") as file:
-            public_key = file.readlines()
-            with open("id_ed25519.pub", "w") as file:
-                file.write(public_key)
-        print('Generated keys saved to "ssh-config", please add public key to git repository...')
+        print("No SSH keys found, generating...")
+        ssh_private_key, ssh_public_key = ssh_generate_keys()
+        print("Saving generated SSH keys to 'ssh-config', please add public key to git server")
+        ssh_export_keys(ssh_private_key, ssh_public_key)
 
-    # Import ssh configuration (if given)
+    # Import SSH configuration (optional)
     print("Checking for SSH config")
-    if "config" in ssh_files:
-        print("SSH config found")
-        with open("config", "r") as file:
-            config = file.readlines()
-        if ssh_config_import(config) != True:
-            sys.exit("Error importing SSH config")
+    ssh_config = ssh_config_search(ssh_files)
+    if ssh_config:
         print("SSH config imported...")
     else:
-        print("No SSH config found, using default")   
+        print("No SSH config found, using default")
 
     # Apply correct ownership and permission to SSH Keys
     print("Applying SSH ownership and permissions")
-    subprocess.run(['chmod', '700', '/root/.ssh'])
-    subprocess.run(['chmod', '600', '/root/.ssh/id_ed25519'])
-    subprocess.run(['chmod', '644', '/root/.ssh/id_ed25519.pub'])
-
+    chmod("/root/.ssh")
+    
     # Sync mirror repors
     os.chdir("..")
     os.chdir("config")
@@ -108,6 +70,14 @@ def main():
             mirror_repo.clone(repo)
     print("CLoneLab finished!  All repositories have been mirrored.")
     print("Exiting")
+
+
+def ssh_read_keys():
+    with open("id_ed25519", "r") as file:
+        ssh_private_key = file.readlines()
+    with open("id_ed25519.pub", "r") as file:
+        ssh_public_key = file.readlines()
+    return ssh_private_key, ssh_public_key
 
 
 def ssh_key_import(private_key, public_key):
@@ -144,6 +114,64 @@ def ssh_known_hosts_import(known_hosts):
     with open("known_hosts", "w") as file:
         for line in known_hosts:
             file.write(line)
+
+
+def key_search(ssh_files):
+    if "id_ed25519" in ssh_files and "id_ed25519.pub" in ssh_files:
+        return True
+    else:
+        return False
+
+
+def check_ssh_path():
+    user_path = os.path.expanduser("~")
+    ssh_path = f"{user_path}/.ssh"
+    if os.path.exists(ssh_path):
+        pass
+    else:
+        os.mkdir(ssh_path)
+
+
+def ssh_generate_keys():
+    subprocess.run(['ssh-keygen', '-t', 'ed25519', '-C', 'clonelab', '-f', '~/.ssh/ed25519', '-q', '-N', '""'])
+    user_path = os.path.expanduser("~")
+    with open(f"{user_path}/.ssh/id_ed25519", "r") as file:
+        private_key = file.readlines()
+        with open("id_ed25519", "w") as file:
+            file.write(private_key)
+    with open(f"{user_path}/.ssh/id_ed25519.pub", "r") as file:
+        public_key = file.readlines()
+        with open("id_ed25519.pub", "w") as file:
+            file.write(public_key)
+    return private_key, public_key
+
+
+def ssh_export_keys(private_key, public_key):
+    path = "/home/config/ssh-config"
+    with open(f"{path}/id_ed25519", "w") as file:
+        for line in private_key:
+            file.write(private_key)
+    with open(f"{path}/id_ed25519.pub", "w") as file:
+        for line in public_key:
+            file.write(public_key)
+
+
+def ssh_config_search(files):
+    if "config" in files:
+        print("SSH config found")
+        with open("config", "r") as file:
+            config = file.readlines()
+        if ssh_config_import(config) != True:
+            sys.exit("Error importing SSH config")
+        return True
+    else: 
+        return False
+
+
+def chmod(ssh_path):
+    subprocess.run(['chmod', '700', f'{ssh_path}'])
+    subprocess.run(['chmod', '600', f'{ssh_path}/id_ed25519'])
+    subprocess.run(['chmod', '644', f'{ssh_path}/id_ed25519.pub'])
 
 
 main()
