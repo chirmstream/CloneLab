@@ -32,7 +32,7 @@ def main():
     ssh_files = []
     for file in os.listdir():
         ssh_files.append(file)
-    ssh_keys = key_search()
+    ssh_keys = key_search(ssh_files)
     if ssh_keys:
         print("Existing SSH keys found, importing...")
         ssh_private_key, ssh_public_key = ssh_read_keys()
