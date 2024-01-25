@@ -84,10 +84,10 @@ def ssh_read_keys():
 def ssh_key_import(private_key, public_key):
     user_path = os.path.expanduser("~")
     if os.path.exists(f"{user_path}/.ssh"):
-        with open("id_ed25519", "w") as file:
+        with open(f"{user_path}/.ssh/id_ed25519", "w") as file:
             for line in private_key:
                 file.write(line)
-        with open("id_ed25519.pub", "w") as file:
+        with open(f"{user_path}/.ssh/id_ed25519.pub", "w") as file:
             for line in public_key:
                 file.write(line)
     else:
