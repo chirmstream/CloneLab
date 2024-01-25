@@ -53,6 +53,17 @@ def main():
     else:
         print("No SSH config found, using default")
 
+    # Import SSH known hosts (optional)
+    print("Checking for SSH known_hosts")
+    hosts_known = ssh_hosts_search(ssh_files)
+    if hosts_known:
+        print("Found SSH known_hosts file, importing...")
+        known_hosts = ssh_read_known_hosts()
+        ssh_known_hosts_import(known_hosts)
+    else:
+        print("No known SSH hosts...")
+
+
     # Apply correct ownership and permission to SSH Keys
     print("Applying SSH ownership and permissions")
     chmod("/root/.ssh")
@@ -79,6 +90,13 @@ def ssh_read_keys():
     with open(f"{path}/id_ed25519.pub", "r") as file:
         ssh_public_key = file.readlines()
     return ssh_private_key, ssh_public_key
+
+
+def ssh_read_known_hosts():
+    path = "/home/CloneLab/ssh-config"
+    with open(f"{path}/known_hosts", "r") as file:
+        known_hosts = file.readlines()
+    return known_hosts
 
 
 def ssh_key_import(private_key, public_key):
@@ -119,6 +137,13 @@ def ssh_known_hosts_import(known_hosts):
 
 def key_search(ssh_files):
     if "id_ed25519" in ssh_files and "id_ed25519.pub" in ssh_files:
+        return True
+    else:
+        return False
+
+
+def ssh_hosts_search(ssh_files):
+    if "known_hosts" in ssh_files:
         return True
     else:
         return False
