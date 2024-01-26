@@ -9,7 +9,7 @@ import subprocess
 def main():
     # Configure git
     print("Importing git configuration")
-    os.chdir("config")
+    os.chdir("/home/CloneLab/config")
     with open("git_config.csv", "r") as git_config:
         reader = csv.DictReader(git_config)
         for row in reader:
@@ -65,7 +65,8 @@ def main():
 
     # Apply correct ownership and permission to SSH Keys
     print("Applying SSH ownership and permissions")
-    chmod("/root/.ssh")
+    user_path = os.path.expanduser("~")
+    chmod(f"{user_path}/.ssh")
     
     # Sync mirror repors
     os.chdir("..")
@@ -116,7 +117,7 @@ def ssh_key_import(private_key, public_key):
 def ssh_config_import(config):
     user_path = os.path.expanduser("~")
     if os.path.exists(f"{user_path}/.ssh"):
-        with open("config", "w") as file:
+        with open(f"{user_path}/.ssh/config", "w") as file:
             for line in config:
                 file.write(line)
     else:
@@ -128,7 +129,7 @@ def ssh_config_import(config):
 def ssh_known_hosts_import(known_hosts):
     user_path = os.path.expanduser("~")
     path = f"{user_path}/.ssh"
-    with open("known_hosts", "w") as file:
+    with open(f"{path}/known_hosts", "w") as file:
         for line in known_hosts:
             file.write(line)
 
@@ -183,7 +184,7 @@ def ssh_export_keys(private_key, public_key):
 def ssh_config_search(files):
     if "config" in files:
         print("SSH config found")
-        with open("config", "r") as file:
+        with open("/home/CloneLab/ssh-config/config", "r") as file:
             config = file.readlines()
         if ssh_config_import(config) != True:
             sys.exit("Error importing SSH config")
