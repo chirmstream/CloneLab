@@ -49,6 +49,9 @@ def main():
     print("Checking for SSH config")
     ssh_config = ssh_config_search(ssh_files)
     if ssh_config:
+        print("SSH config found")
+        ssh_config = ssh_read_config("config")
+        ssh_config_import(ssh_config)
         print("SSH config imported...")
     else:
         print("No SSH config found, using default")
@@ -183,14 +186,18 @@ def ssh_export_keys(private_key, public_key):
 
 def ssh_config_search(files):
     if "config" in files:
-        print("SSH config found")
-        with open("/home/CloneLab/ssh-config/config", "r") as file:
-            config = file.readlines()
-        if ssh_config_import(config) != True:
-            sys.exit("Error importing SSH config")
         return True
     else: 
         return False
+
+
+def ssh_read_config(config):
+    try:
+        with open(f"/home/CloneLab/ssh-config/{config}", "r") as file:
+            config = file.readlines()
+        return config
+    except:
+        sys.exit("error importing ssh-config")
 
 
 def chmod(ssh_path):
