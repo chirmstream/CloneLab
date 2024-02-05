@@ -11,10 +11,19 @@ gpg -o private.gpg --export-options backup --export-secret-keys ponder.stibbons@
 
 gpg --import-options restore --import private.gpg
 
+
+## ToDo
+* Generate new SSH keys when no existing keys are found.
+* Save new keys to host machine 
+* Copy example files to host machine on startup
+* Merge into 'main' branch
+* Automatically start sync with CRON.
+
+
 ## Docker container mapping
 docker run \
     -v /example-host/config:/home/CloneLab/config \
-    -v /example-host/config/ssh:/home/CloneLab/config/ssh \
+    -v /example-host/config/ssh:/home/CloneLab/config/ssh-config \
     -v /example-host/data:/root/CloneLab-data
 
 
@@ -27,6 +36,7 @@ Activate enviroment:
 
     . venv/bin/activate
 
+
 ## GitLab Notes
 By default branch protection may hinder CloneLab's ability to push code.  Make sure "Allowed to force push" is enabled under ``Settings>Repository>Protected branches``.
 
@@ -38,6 +48,7 @@ To authenticate with SSH you will need to supply a ``known_hosts`` file with you
 If you are not using the default SSH port (22) you can specify with ``-p``.
 
     ssh-keyscan -p 22 github.com >> ~/.ssh/known_hosts
+
 
 ## Prune docker build cache
 
