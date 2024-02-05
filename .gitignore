@@ -165,5 +165,3 @@ repos/
 
 private.gpg
 config.csv
-config/
-ssh-config/
