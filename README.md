@@ -36,18 +36,37 @@ Activate enviroment:
 
     . venv/bin/activate
 
+## Configuring SSH
+### SSH Keys
+CloneLab will generate new SSH keys for you if none are provided.  If you already have keys, or prefer to generate your own simply add them to your ``ssh-config`` path.  Note that at this time CloneLab only supports ed25519 keys currently, although support may be expanded later.  You must name your private and public keys ``id_ed25519`` and ``id_ed25519.pub`` respectivly.  Make sure to add the public keys to your git server, otherwise they will not authenticate.  
 
-## GitLab Notes
-By default branch protection may hinder CloneLab's ability to push code.  Make sure "Allowed to force push" is enabled under ``Settings>Repository>Protected branches``.
+Review GitHubs documentation for generating SSH keys and adding them to your account [here](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
-Selfhosted git servers and SSH keys
-To authenticate with SSH you will need to supply a ``known_hosts`` file with your git server's public SSH key.  To easily find you SSH key you can use the ``ssh-keyscan`` command.
+### SSH Server Verification 
+The ``known_hosts`` file tells your machine what SSH connections it can trust.  GitHub publishes their public keys [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints).  If you are using a different git server they should have their public keys published as well.  CloneLab has already taken GitHubs public SSH key fingerprints and put them into a default ``known_hosts`` file.  Simply add any new public keys to a new line for each server you are connecting to.
+
+    ssh-keyscan github.com
+
+To find the public SSH key for a server use the ``ssh-keyscan`` command.  If your git server is using a different port for SSH, designate the correct port with ``-p``.
+
+    ssh-keyscan -p 22 github.com
+
+If you would like to save the output to a file use ``>>[file_path]``.
 
     ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-If you are not using the default SSH port (22) you can specify with ``-p``.
+### SSH ports
+To specific SSH port you must create a ``config`` file and add it to the ``ssh-config`` path.  Here you can specify each ``Host`` followed by which ``Port`` to use.
 
-    ssh-keyscan -p 22 github.com >> ~/.ssh/known_hosts
+    Host github.com
+    Port 22
+
+
+## Configuring GPG signed commits
+
+
+## GitLab Notes
+By default branch protection may hinder CloneLab's ability to push code.  Make sure "Allowed to force push" is enabled under ``Settings>Repository>Protected branches``.
 
 
 ## Prune docker build cache
