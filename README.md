@@ -63,6 +63,32 @@ To specific SSH port you must create a ``config`` file and add it to the ``ssh-c
 
 
 ## Configuring GPG signed commits
+CloneLab will sign each commit using GPG keys.  CloneLab will not generate new GPG keys, you will have to generate them yourself and supply them to CloneLab in the ``config`` path.
+
+Generate your GPG key using GitHubs [documentation](https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key).  After generating your keys you will need to export them into a ``private.gpg`` file.
+
+    gpg -o private.gpg --export-options backup --export-secret-keys
+
+To see a list of all your keys and then export a specific one use ``gpg --list-secret-keys`` and note which email is associated to the key you wish to export.
+
+    gpg --list-secret-keys --keyid-format LONG
+
+You should see an output similar to this:
+
+    gpg: checking the trustdb
+    gpg: marginals needed: 3  completes needed: 1  trust model: pgp
+    gpg: depth: 0  valid:   3  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 3u
+    gpg: next trustdb check due at 2023-09-21
+    /Users/firstnamelastname/.gnupg/pubring.kbx
+    --------------------------------------
+    sec   rsa3072/E3F678E2082FFD28 2023-09-14 [SC] [expires: 2023-09-21]
+        EF5B15FEAB93784D5A978136E3F678E2082FFD28
+    uid                 [ultimate] test-name (no comment) <test-email@example.com>
+    ssb   rsa3072/0AE917C1039735BD 2023-09-14 [E] [expires: 2023-09-21]
+
+Export your chosen key
+
+    gpg -o private.gpg --export-options backup --export-secret-keys <key-email>
 
 
 ## GitLab Notes
