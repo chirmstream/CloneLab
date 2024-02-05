@@ -1,6 +1,6 @@
 FROM ubuntu:jammy
 LABEL "author"="chirmstream"
-LABEL version="0.1"
+LABEL version="0.2"
 
 # Install requirements
 RUN apt-get update && apt-get install -y \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 # Setup CloneLab (use git clone in future)
 WORKDIR /root
-RUN git clone -b rewrite https://github.com/chirmstream/CloneLab.git
+RUN git clone -b main https://github.com/chirmstream/CloneLab.git
 
 # Copy example config from /root/CloneLab
 WORKDIR /home/
