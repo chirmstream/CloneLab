@@ -5,12 +5,12 @@ import subprocess
 # Export example files to their respective paths
 def export_examples(cwd):
     user_path = os.path.expanduser("~")
-    example_files = {
-        'config' : f"{user_path}/config/config.csv",
-        'git_config' : f"{user_path}/config/git_config.csv",
-        'known_hosts' : f"{user_path}/ssh-config/known_hosts",
-        'ssh_config' : f"{user_path}/ssh-config/config",
-    }
+    example_files = [
+        f"{user_path}/config/config.csv",
+        f"{user_path}/config/git_config.csv",
+        f"{user_path}/ssh-config/known_hosts",
+        f"{user_path}/ssh-config/config",
+    ]
     for example_file in example_files:
         if os.path.isfile(example_file):
             pass
