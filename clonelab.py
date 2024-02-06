@@ -206,4 +206,6 @@ def chmod(ssh_path):
     subprocess.run(['chmod', '644', f'{ssh_path}/id_ed25519.pub'])
 
 
-main()
+if __name__ == "__main__":
+    main()
+    
