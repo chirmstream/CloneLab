@@ -22,7 +22,6 @@ def export_examples(cwd):
 def save_file(dest, cwd):
     # Get file name and which config folder using regex in dest
     match = re.search(r".+/((?:config)|(?:ssh-config))/((?:config.csv)|(?:git_config.csv)|(?:known_hosts)|(?:config))$", dest)
-    matches = match.groups()
     folder, name = match.groups()
     if name == "config":
         name = "ssh_config"

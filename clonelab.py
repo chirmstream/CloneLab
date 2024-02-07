@@ -72,8 +72,7 @@ def main():
     user_path = os.path.expanduser("~")
     chmod(f"{user_path}/.ssh")
 
-    ## Export generated SSH keys and any other example files
-    user_path = os.path.expanduser("~")
+    ## Export generated SSH keys and copy any other example files
     load.export_examples(f"{user_path}/CloneLab")
     
     # Sync mirror repors
