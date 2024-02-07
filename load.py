@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import re
 
 # Export example files to their respective paths
 def export_examples(cwd):
@@ -17,13 +18,17 @@ def export_examples(cwd):
         else:
             save_file(example_file, cwd)
     
-    
-    
-    
+
+def save_file(dest, cwd):
+    # Get file name and which config folder using regex in dest
+    match = re.search(r".+/((?:config)|(?:ssh-config))/((?:config.csv)|(?:git_config.csv)|(?:known_hosts)|(?:config))$", dest)
+    matches = match.groups()
+    folder, name = match.groups()
+    if name == "config":
+        name = "ssh_config"
+    src = cwd + f"/example_files/{folder}/{name}.example"
+    subprocess.run(['cp', src, dest])
+
+
 #def export_keys(cwd):
-
-
-def save_file(file, cwd):
-    path = file['config']
-    name = 'config'
-    subprocess.run(['cp', f'{cwd}/rest_of_path/config', path])
+    
