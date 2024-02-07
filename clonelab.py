@@ -3,6 +3,7 @@ import os
 import csv
 import sys
 import subprocess
+import load
 
 
 # Starting working directory is /home/CloneLab/
@@ -70,6 +71,10 @@ def main():
     print("Applying SSH ownership and permissions")
     user_path = os.path.expanduser("~")
     chmod(f"{user_path}/.ssh")
+
+    ## Export generated SSH keys and any other example files
+    user_path = os.path.expanduser("~")
+    load.export_examples(f"{user_path}/CloneLab")
     
     # Sync mirror repors
     os.chdir("..")
