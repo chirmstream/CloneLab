@@ -15,7 +15,15 @@ gpg --import-options restore --import private.gpg
 ## ToDo
 * Generate new SSH keys when no existing keys are found.
 * Save new keys to host machine 
+* Traceback (most recent call last):
 
+        File "/root/CloneLab/clonelab.py", line 218, in <module>
+            main()
+        File "/root/CloneLab/clonelab.py", line 49, in main
+            ssh_private_key, ssh_public_key = ssh_generate_keys()
+        File "/root/CloneLab/clonelab.py", line 174, in ssh_generate_keys
+            with open(f"{user_path}/.ssh/id_ed25519", "r") as file:
+        FileNotFoundError: [Errno 2] No such file or directory: '/root/.ssh/id_ed25519'
 
 
 ## Docker container mapping
