@@ -20,9 +20,10 @@ def export_examples(cwd):
     
 
 # Get file name and which config folder using regex in dest
-def save_file(dest, cwd):
+def save_file(src, cwd):
     match = re.search(r".+/((?:config)|(?:ssh-config))/((?:config.csv)|(?:git_config.csv)|(?:known_hosts)|(?:config))$", dest)
     folder, name = match.groups()
+    dest = f"/home/CloneLab/{folder}/{name}"
     if name == "config":
         name = "ssh_config"
     src = cwd + f"/example_files/{folder}/{name}.example"
