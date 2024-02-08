@@ -15,8 +15,7 @@ gpg --import-options restore --import private.gpg
 ## ToDo
 * Generate new SSH keys when no existing keys are found.
 * Save new keys to host machine 
-* Test/Validate Copy example files to host machine on startup works
-* Split up load.py.  Copy example files at start of ``clonelab.py``, and copy any generated keys at the end of ``clonelab.py``
+
 
 
 ## Docker container mapping
