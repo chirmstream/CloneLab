@@ -8,6 +8,9 @@ import load
 
 # Starting working directory is /home/CloneLab/
 def main():
+    # Save default configuration files for user convience IF configs not provided
+    load.export_examples(f"{user_path}/CloneLab")
+
     # Configure git
     print("Importing git configuration")
     os.chdir("/home/CloneLab/config")
@@ -72,8 +75,8 @@ def main():
     user_path = os.path.expanduser("~")
     chmod(f"{user_path}/.ssh")
 
-    ## Export generated SSH keys and copy any other example files
-    load.export_examples(f"{user_path}/CloneLab")
+    # Export SSH keys
+    load.ssh_keys(user_path)
     
     # Sync mirror repors
     os.chdir("..")
