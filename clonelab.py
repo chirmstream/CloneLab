@@ -9,6 +9,7 @@ import load
 # Starting working directory is /home/CloneLab/
 def main():
     # Save default configuration files for user convience IF configs not provided
+    user_path = os.path.expanduser("~")
     load.export_examples(f"{user_path}/CloneLab")
 
     # Configure git
