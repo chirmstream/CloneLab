@@ -74,9 +74,6 @@ def main():
     print("Applying SSH ownership and permissions")
     user_path = os.path.expanduser("~")
     chmod(f"{user_path}/.ssh")
-
-    # Export SSH keys
-    load.ssh_keys(user_path)
     
     # Sync mirror repors
     os.chdir("..")
@@ -90,6 +87,9 @@ def main():
             mirror_repo = git.Repo(row["mirror_repository"], "mirror")
             mirror_repo.clone(repo)
     print("CLoneLab finished!  All repositories have been mirrored.")
+
+    # Export SSH keys
+    load.ssh_keys(user_path)
     print("Exiting")
 
 
