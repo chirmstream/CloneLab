@@ -48,7 +48,7 @@ def main():
         print("No SSH keys found, generating...")
         ssh_private_key, ssh_public_key = ssh_generate_keys()
         print("Saving generated SSH keys to 'ssh-config', please add public key to git server")
-        ssh_export_keys(ssh_private_key, ssh_public_key)
+        #ssh_export_keys(ssh_private_key, ssh_public_key)
 
     # Import SSH configuration (optional)
     print("Checking for SSH config")
@@ -192,10 +192,10 @@ def ssh_export_keys(private_key, public_key):
     path = "/home/config/ssh-config"
     with open(f"{path}/id_ed25519", "w") as file:
         for line in private_key:
-            file.write(private_key)
+            file.write(line)
     with open(f"{path}/id_ed25519.pub", "w") as file:
         for line in public_key:
-            file.write(public_key)
+            file.write(line)
 
 
 def ssh_config_search(files):
