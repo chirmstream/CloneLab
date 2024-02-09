@@ -48,7 +48,7 @@ def main():
         print("No SSH keys found, generating...")
         ssh_private_key, ssh_public_key = ssh_generate_keys()
         print("Saving generated SSH keys to 'ssh-config', please add public key to git server")
-        #ssh_export_keys(ssh_private_key, ssh_public_key)
+        ssh_export_keys(ssh_private_key, ssh_public_key)
 
     # Import SSH configuration (optional)
     print("Checking for SSH config")
@@ -90,7 +90,7 @@ def main():
     print("CLoneLab finished!  All repositories have been mirrored.")
 
     # Export SSH keys
-    load.ssh_keys(user_path)
+    #load.ssh_keys(user_path)
     print("Exiting")
 
 
