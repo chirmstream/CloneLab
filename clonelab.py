@@ -174,11 +174,13 @@ def ssh_generate_keys():
     with open(f"{user_path}/.ssh/id_ed25519", "r") as file:
         private_key = file.readlines()
         with open("id_ed25519", "w") as file:
-            file.write(private_key)
+            for line in private_key:
+                file.write(line)
     with open(f"{user_path}/.ssh/id_ed25519.pub", "r") as file:
         public_key = file.readlines()
         with open("id_ed25519.pub", "w") as file:
-            file.write(public_key)
+            for line in public_key:
+                file.write(line)
     return private_key, public_key
 
 
