@@ -169,6 +169,7 @@ def check_ssh_path():
 
 
 def ssh_generate_keys():
+    check_ssh_path()
     subprocess.run(['ssh-keygen', '-t', 'ed25519', '-C', 'clonelab', '-f', '~/.ssh/id_ed25519', '-q', '-N', '""'])
     user_path = os.path.expanduser("~")
     with open(f"{user_path}/.ssh/id_ed25519", "r") as file:
