@@ -189,7 +189,7 @@ def ssh_generate_keys():
 
 
 def ssh_export_keys(private_key, public_key):
-    path = "/home/config/ssh-config"
+    path = "/home/CloneLab/ssh-config"
     with open(f"{path}/id_ed25519", "w") as file:
         for line in private_key:
             file.write(line)
