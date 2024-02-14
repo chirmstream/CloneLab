@@ -6,6 +6,7 @@ CloneLab is a utility for cloning a repository commit by commit.
 * Create Logo
 * Update setting up dev enviroment to use ``setup.py``
 * Fix docker container "About" section.  I.E., fill in description, annotation, author, etc.
+* Complete ``test_clonelab.py``, and merge ``test.py`` into ``test_clonelab.py``
 
 
 ## About
