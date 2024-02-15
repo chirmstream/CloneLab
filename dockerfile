@@ -20,11 +20,6 @@ WORKDIR /home/CloneLab/
 RUN mkdir config
 RUN mkdir ssh-config
 
-# TODO (move to script so it will do it before every start, regardless of container state)
-#ADD https://raw.githubusercontent.com/chirmstream/CloneLab/rewrite/example_files/config.csv.example /home/CloneLab/config/config.example
-#ADD https://raw.githubusercontent.com/chirmstream/CloneLab/rewrite/example_files/git_config.csv.example /home/CloneLab/config/git_config.csv
-#ADD https://raw.githubusercontent.com/chirmstream/CloneLab/rewrite/example_files/ssh_config.example /home/CloneLab/ssh-config/config.example
-
 # Run CloneLab
 WORKDIR /home/CloneLab/
 #ENTRYPOINT ["tail"]
