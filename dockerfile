@@ -1,7 +1,5 @@
 FROM ubuntu:jammy
 
-LABEL org.opencontainers.image.description="My container image"
-
 # Install requirements
 RUN apt-get update && apt-get install -y \
     python3 \
