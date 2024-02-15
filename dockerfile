@@ -1,10 +1,5 @@
 FROM ubuntu:jammy
 
-LABEL org.opencontainers.image.title=CloneLab
-LABEL org.opencontainers.image.version=0.2
-LABEL org.opencontainers.image.authors=chirmstream
-LABEL org.opencontainers.image.source=https://github.com/chirmstream/CloneLab
-LABEL org.opencontainers.image.licenses=MIT
 LABEL org.opencontainers.image.description="My container image"
 
 # Install requirements
