@@ -2,4 +2,3 @@ python3
 git
 rsync
 gpg
-pytest
