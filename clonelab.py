@@ -160,12 +160,17 @@ def ssh_hosts_search(ssh_files):
 
 
 def check_ssh_path():
-    user_path = os.path.expanduser("~")
-    ssh_path = f"{user_path}/.ssh"
+    try:
+        user_path = os.path.expanduser("~")
+        ssh_path = f"{user_path}/.ssh"
+    except:
+        return 1
     if os.path.exists(ssh_path):
         pass
+        return 0
     else:
         os.mkdir(ssh_path)
+        return 0
 
 
 def ssh_generate_keys():

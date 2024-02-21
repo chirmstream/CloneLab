@@ -1,22 +1,40 @@
-import git
+import pytest
 import os
-import csv
-import sys
+import load
+from clonelab import ssh_key_import
+from clonelab import ssh_config_import
+from clonelab import check_ssh_path
+
+
+if os.getenv('_PYTEST_RAISE', "0") != "0":
+
+    @pytest.hookimpl(tryfirst=True)
+    def pytest_exception_interact(call):
+        raise call.excinfo.value
+
+    @pytest.hookimpl(tryfirst=True)
+    def pytest_internalerror(excinfo):
+        raise excinfo.value
 
 
 def main():
-    # Sync mirror repos
-    with open("config.csv", "r") as csvfile:
-        reader = csv.DictReader(csvfile)
-        fieldnames = reader.fieldnames
-        os.chdir("..")
-        for row in reader:
-            repo = git.Repo(row["original_repository"], "original")
-            mirror_repo = git.Repo(row["mirror_repository"], "mirror")
-            mirror_repo.clone(repo)
+    load.export_examples("/home/CloneLab/code/CloneLab")
+    print("Done")
 
-    print("CLoneLab finished!  All repositories have been mirrored.")
-    print("Exiting")
+
+def test_ssh_key_import():
+    private_key = "example private key"
+    public_key = "example public key"
+    assert ssh_key_import(private_key, public_key) == True
+
+
+def test_ssh_config_import():
+    config = "this is an example ssh config file"
+    assert ssh_config_import(config) == True
+
+
+def test_check_ssh_path():
+    assert check_ssh_path() == 0
 
 
 main()
