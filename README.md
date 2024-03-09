@@ -1,5 +1,7 @@
+<p align="center">
+<img src="https://raw.githubusercontent.com/chirmstream/clonelab/logo.png" width="150" title="logo">
+</p>
 # CloneLab
-Logo Space
 
 
 ## ToDo
