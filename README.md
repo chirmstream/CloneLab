@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/chirmstream/CloneLab/main/logo.png" width="250" title="logo">
+<img src="https://raw.githubusercontent.com/chirmstream/CloneLab/main/logo.png" width="350" title="logo">
 </p>
 
 # CloneLab
